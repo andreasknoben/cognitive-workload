@@ -1,0 +1,38 @@
+# ASA electrode file
+ReferenceLabel	avg
+UnitPosition	cm
+NumberPositions=	16
+Positions
+0.95 -0.31 0
+0.95 0.31 0
+0.7 -0.57 0.44
+0.71 0 0.71
+0.7 0.57 0.44
+0 -1 0
+0 -0.71 0.71
+0 0 1
+0 0.71 0.71
+0 1 0
+-0.7 -0.57 0.44
+-0.71 0 0.71
+-0.7 0.57 0.44
+-0.81 -0.59 0
+-0.81 0.59 0
+-1 0 0
+Labels
+Fp1
+Fp2
+F3
+Fz
+F4
+T7
+C3
+Cz
+C4
+T8
+P3
+Pz
+P4
+PO7
+PO8
+Oz
