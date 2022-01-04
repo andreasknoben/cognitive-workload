@@ -17,7 +17,7 @@ The `question-evaluation` folder contains the code that allows to check the ques
 The `answers` subfolder contains the files with the correct answers according to Gemino (1999). These are provided in plain text files.
 
 ### evaluation.ipynb
-The `evaluation.ipynb` Python notebook allows to evaluate the answers given in the Qualtrics survey as automatic as possible. It loads the survey data file (CSV) and determines the participant's condition. For the yes/no questions, it inserts a 1 if the answer was correct and a 0 if the answer was incorrect. For the cloze test, it inserts a 1 if there is an exact match and leaves the word if not (to check manually for typos or synonyms). The problem-solving questions are left untouched. These results are then output to a new `results.csv` file.
+The `evaluation.py` script allows to evaluate the answers given in the Qualtrics survey as automatic as possible. It loads the survey data file (CSV) and determines the participant's condition. For the yes/no questions, it inserts a 1 if the answer was correct and a 0 if the answer was incorrect. For the cloze test, it inserts a 1 if there is an exact match and leaves the word if not (to check manually for typos or synonyms). The problem-solving questions are left untouched. These results are then output to a new `results.csv` file.
 
 ## References
 Gemino, A. C. (1999). _Empirical comparisons of system analysis modeling techniques_ (Doctoral dissertation, University of British Columbia).
