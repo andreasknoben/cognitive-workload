@@ -6,7 +6,7 @@ dir_treatment = "data/treatment";
 dir_control_processed = "processed-data/control";
 dir_treatment_processed = "processed-data/treatment";
 
-process_control = process_dir(dir_control, dir_control_processed);
+% process_control = process_dir(dir_control, dir_control_processed);
 process_treatment = process_dir(dir_treatment, dir_treatment_processed);
 
 function processed = process_dir(data_dir, processed_dir)
