@@ -4,11 +4,17 @@ This repository contains the code for the research project "Cognitive Workload A
 ## EEG Processing
 The `eeg-processing` folder contains the code necessary to process the EEG data. This section reviews the functions of each file.
 
-### preprocess.m
-The `preprocess.m` file is a MATLAB script that aims to preprocess the EEG data from the `data` folder and save it in a preprocessed format ready for use. It extracts the time and keyboard presses vectors and the actual EEG data and subsequently the 16 channels that are used. It applies a 0.5-60Hz bandpass filter (note: during extraction, the data should have already been filtered this way). It then runs ICA, plots the components and asks which to remove. After this removal, the dataset is repackaged and stored in the `processed-data` folder.
+### calc_power.m
+The `calc_power.m` file is a MATLAB script that runs through the processed EEG data from the `processed-data` folder and calculates theta, alpha, and beta frequency band powers. It determines the participant, condition, and model, and then fills a new matrix with the powers for each of these. It does this using the `spectopo()` function from EEGLAB. Finally, it stores these powers into a `.mat` file in the `powers` folder.
 
 ### chan_locs.elc
 `chan_locs.elc` contains the locations of the channels used in this experiment.
+
+### generate_results.py
+The `generate_results.py` takes the `.mat` files created by `calc_power.m`, in which the powers are stored. It calculates the EEG Engagement Indices for each participant and channel and puts them in the appropriate conditions. From this data, per channel, it creates a boxplot and runs a two-way ANOVA. The results of these can be found in the `results` folder.
+
+### preprocess.m
+The `preprocess.m` file is a MATLAB script that aims to preprocess the EEG data from the `data` folder and save it in a preprocessed format ready for use. It extracts the time and keyboard presses vectors and the actual EEG data and subsequently the 16 channels that are used. It applies a 0.5-60Hz bandpass filter (note: during extraction, the data should have already been filtered this way). It then runs ICA, plots the components and asks which to remove. After this removal, the dataset is repackaged and stored in the `processed-data` folder.
 
 ## Question Evaluation
 The `question-evaluation` folder contains the code that allows to check the questions automatically for as much as possible.
