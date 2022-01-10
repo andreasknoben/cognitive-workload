@@ -31,8 +31,10 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
     cloze_powers_VB = zeros(n_subj, 16, 3);
 
     part = 0;
+    prev_subj = 0;
+    curr_subj = 0;
     for i = 1:length(files)
-        part = part + 1;
+        prev_subj = curr_subj;
         filename = fullfile(data_dir, files(i).name);
         data = load(filename);
         EEG = data.EEG;
@@ -42,7 +44,13 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         srate = EEG.srate;
         nChans = EEG.nbchan;
 
+        disp(strcat("Processing ", filename))
+
         [subj, cond, mod] = process_filename(files(i).name);
+        curr_subj = subj;
+        if curr_subj ~= prev_subj
+            part = part + 1;
+        end
 
         if cond == "baseline"
             for chan = 1:nChans
@@ -60,38 +68,38 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         elseif cond == "model"
             [yesno, open, cloze, total] = extract_model_tasks(EEG_data, keys);
             for chan = 1:nChans
-                [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
-                if mod == "FE"
-                    yesno_powers_FE(part, chan, 1) = thetaPower;
-                    yesno_powers_FE(part, chan, 2) = alphaPower;
-                    yesno_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
-                    yesno_powers_VB(part, chan, 1) = thetaPower;
-                    yesno_powers_VB(part, chan, 2) = alphaPower;
-                    yesno_powers_VB(part, chan, 3) = betaPower;
-                end
-
-                [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
-                if mod == "FE"
-                    open_powers_FE(part, chan, 1) = thetaPower;
-                    open_powers_FE(part, chan, 2) = alphaPower;
-                    open_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
-                    open_powers_VB(part, chan, 1) = thetaPower;
-                    open_powers_VB(part, chan, 2) = alphaPower;
-                    open_powers_VB(part, chan, 3) = betaPower;
-                end
-
-                [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
-                if mod == "FE"
-                    cloze_powers_FE(part, chan, 1) = thetaPower;
-                    cloze_powers_FE(part, chan, 2) = alphaPower;
-                    cloze_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
-                    cloze_powers_VB(part, chan, 1) = thetaPower;
-                    cloze_powers_VB(part, chan, 2) = alphaPower;
-                    cloze_powers_VB(part, chan, 3) = betaPower;
-                end
+%                 [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
+%                 if mod == "FE"
+%                     yesno_powers_FE(part, chan, 1) = thetaPower;
+%                     yesno_powers_FE(part, chan, 2) = alphaPower;
+%                     yesno_powers_FE(part, chan, 3) = betaPower;
+%                 elseif mod == "VB"
+%                     yesno_powers_VB(part, chan, 1) = thetaPower;
+%                     yesno_powers_VB(part, chan, 2) = alphaPower;
+%                     yesno_powers_VB(part, chan, 3) = betaPower;
+%                 end
+% 
+%                 [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
+%                 if mod == "FE"
+%                     open_powers_FE(part, chan, 1) = thetaPower;
+%                     open_powers_FE(part, chan, 2) = alphaPower;
+%                     open_powers_FE(part, chan, 3) = betaPower;
+%                 elseif mod == "VB"
+%                     open_powers_VB(part, chan, 1) = thetaPower;
+%                     open_powers_VB(part, chan, 2) = alphaPower;
+%                     open_powers_VB(part, chan, 3) = betaPower;
+%                 end
+% 
+%                 [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
+%                 if mod == "FE"
+%                     cloze_powers_FE(part, chan, 1) = thetaPower;
+%                     cloze_powers_FE(part, chan, 2) = alphaPower;
+%                     cloze_powers_FE(part, chan, 3) = betaPower;
+%                 elseif mod == "VB"
+%                     cloze_powers_VB(part, chan, 1) = thetaPower;
+%                     cloze_powers_VB(part, chan, 2) = alphaPower;
+%                     cloze_powers_VB(part, chan, 3) = betaPower;
+%                 end
 
                 [thetaPower, alphaPower, betaPower] = calculate_powers(total, chan, srate);
                 if mod == "FE"
@@ -130,15 +138,16 @@ function [subj, cond, mod] = process_filename(filename)
 end
 
 function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
+    disp(size(data,2));
     [spectra, freqs] = spectopo(data(chan,:,:), 0, Fs, 'winsize', Fs, 'nfft', Fs);
 
-     thetaIdx = find(freqs>4 & freqs<8);
-     alphaIdx = find(freqs>8 & freqs<13);
-     betaIdx  = find(freqs>13 & freqs<30);
+    thetaIdx = find(freqs>4 & freqs<8);
+    alphaIdx = find(freqs>8 & freqs<13);
+    betaIdx  = find(freqs>13 & freqs<30);
 
-     thetaPower = mean(10.^(spectra(thetaIdx)/10));
-     alphaPower = mean(10.^(spectra(alphaIdx)/10));
-     betaPower  = mean(10.^(spectra(betaIdx)/10));
+    thetaPower = mean(10.^(spectra(thetaIdx)/10));
+    alphaPower = mean(10.^(spectra(alphaIdx)/10));
+    betaPower  = mean(10.^(spectra(betaIdx)/10));
 end
 
 function [yesno, open, cloze, total] = extract_model_tasks(data, keys)
@@ -147,10 +156,11 @@ function [yesno, open, cloze, total] = extract_model_tasks(data, keys)
     end_task_i = strfind(keys, end_task_seq);
     new_task_i = strfind(keys, new_task_seq);
     
-    question_tasks = data(:,new_task_i(2):end_task_i(5));
-    total = question_tasks(:,keys == 66);
+    question_tasks = data(:,new_task_i(2):end_task_i(end));
+    question_keys = keys(:,new_task_i(2):end_task_i(end));
+    total = question_tasks(:,question_keys(1,:) == 66);
 
     yesno = data(:,new_task_i(2):end_task_i(3));
     open = data(:,new_task_i(3):end_task_i(4));
-    cloze = data(:,new_task_i(4):end_task_i(5));
+    cloze = data(:,new_task_i(4):end_task_i(end)+1);
 end
