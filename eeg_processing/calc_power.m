@@ -68,38 +68,38 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         elseif cond == "model"
             [yesno, open, cloze, total] = extract_model_tasks(EEG_data, keys);
             for chan = 1:nChans
-%                 [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
-%                 if mod == "FE"
-%                     yesno_powers_FE(part, chan, 1) = thetaPower;
-%                     yesno_powers_FE(part, chan, 2) = alphaPower;
-%                     yesno_powers_FE(part, chan, 3) = betaPower;
-%                 elseif mod == "VB"
-%                     yesno_powers_VB(part, chan, 1) = thetaPower;
-%                     yesno_powers_VB(part, chan, 2) = alphaPower;
-%                     yesno_powers_VB(part, chan, 3) = betaPower;
-%                 end
-% 
-%                 [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
-%                 if mod == "FE"
-%                     open_powers_FE(part, chan, 1) = thetaPower;
-%                     open_powers_FE(part, chan, 2) = alphaPower;
-%                     open_powers_FE(part, chan, 3) = betaPower;
-%                 elseif mod == "VB"
-%                     open_powers_VB(part, chan, 1) = thetaPower;
-%                     open_powers_VB(part, chan, 2) = alphaPower;
-%                     open_powers_VB(part, chan, 3) = betaPower;
-%                 end
-% 
-%                 [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
-%                 if mod == "FE"
-%                     cloze_powers_FE(part, chan, 1) = thetaPower;
-%                     cloze_powers_FE(part, chan, 2) = alphaPower;
-%                     cloze_powers_FE(part, chan, 3) = betaPower;
-%                 elseif mod == "VB"
-%                     cloze_powers_VB(part, chan, 1) = thetaPower;
-%                     cloze_powers_VB(part, chan, 2) = alphaPower;
-%                     cloze_powers_VB(part, chan, 3) = betaPower;
-%                 end
+                [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
+                if mod == "FE"
+                    yesno_powers_FE(part, chan, 1) = thetaPower;
+                    yesno_powers_FE(part, chan, 2) = alphaPower;
+                    yesno_powers_FE(part, chan, 3) = betaPower;
+                elseif mod == "VB"
+                    yesno_powers_VB(part, chan, 1) = thetaPower;
+                    yesno_powers_VB(part, chan, 2) = alphaPower;
+                    yesno_powers_VB(part, chan, 3) = betaPower;
+                end
+
+                [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
+                if mod == "FE"
+                    open_powers_FE(part, chan, 1) = thetaPower;
+                    open_powers_FE(part, chan, 2) = alphaPower;
+                    open_powers_FE(part, chan, 3) = betaPower;
+                elseif mod == "VB"
+                    open_powers_VB(part, chan, 1) = thetaPower;
+                    open_powers_VB(part, chan, 2) = alphaPower;
+                    open_powers_VB(part, chan, 3) = betaPower;
+                end
+
+                [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
+                if mod == "FE"
+                    cloze_powers_FE(part, chan, 1) = thetaPower;
+                    cloze_powers_FE(part, chan, 2) = alphaPower;
+                    cloze_powers_FE(part, chan, 3) = betaPower;
+                elseif mod == "VB"
+                    cloze_powers_VB(part, chan, 1) = thetaPower;
+                    cloze_powers_VB(part, chan, 2) = alphaPower;
+                    cloze_powers_VB(part, chan, 3) = betaPower;
+                end
 
                 [thetaPower, alphaPower, betaPower] = calculate_powers(total, chan, srate);
                 if mod == "FE"
@@ -139,7 +139,7 @@ end
 
 function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
     disp(size(data,2));
-    [spectra, freqs] = spectopo(data(chan,:,:), 0, Fs, 'winsize', Fs, 'nfft', Fs);
+    [spectra, freqs] = spectopo(data(chan,:,:), 0, Fs, 'winsize', Fs, 'nfft', Fs, 'plot', 'off');
 
     thetaIdx = find(freqs>4 & freqs<8);
     alphaIdx = find(freqs>8 & freqs<13);
@@ -155,12 +155,36 @@ function [yesno, open, cloze, total] = extract_model_tasks(data, keys)
     new_task_seq = [69 66];
     end_task_i = strfind(keys, end_task_seq);
     new_task_i = strfind(keys, new_task_seq);
-    
-    question_tasks = data(:,new_task_i(2):end_task_i(end));
-    question_keys = keys(:,new_task_i(2):end_task_i(end));
-    total = question_tasks(:,question_keys(1,:) == 66);
 
-    yesno = data(:,new_task_i(2):end_task_i(3));
-    open = data(:,new_task_i(3):end_task_i(4));
-    cloze = data(:,new_task_i(4):end_task_i(end)+1);
+    if length(end_task_i) ~= 5
+        if length(new_task_i) == 4
+            question_tasks = data(:,new_task_i(2):end);
+            question_keys = keys(:,new_task_i(2):end);
+            total = question_tasks(:,question_keys(1,:) == 66);
+
+            yesno = data(:,new_task_i(2):end_task_i(3));
+            open = data(:,new_task_i(3):end_task_i(4));
+            cloze = data(:,new_task_i(4):end);
+        elseif length(new_task_i) == 5 && new_task_i(end) == 425574
+            question_tasks = data(:,new_task_i(2):end_task_i(5));
+            question_keys = keys(:,new_task_i(2):end_task_i(5));
+            total = question_tasks(:,question_keys(1,:) == 66);
+
+            yesno = data(:,new_task_i(2):end_task_i(3));
+            open = data(:,new_task_i(3):end_task_i(4));
+            cloze = data(:,new_task_i(4):end_task_i(5));
+        else
+            error("Amount of new task beginnings not equal to 4");
+        end
+    elseif length(end_task_i) == 5
+        question_tasks = data(:,new_task_i(2):end_task_i(5));
+        question_keys = keys(:,new_task_i(2):end_task_i(5));
+        total = question_tasks(:,question_keys(1,:) == 66);
+
+        yesno = data(:,new_task_i(2):end_task_i(3));
+        open = data(:,new_task_i(3):end_task_i(4));
+        cloze = data(:,new_task_i(4):end_task_i(5));
+    else
+        error("Amount of task endings not equal to 4 or 5");
+    end
 end
