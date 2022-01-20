@@ -112,27 +112,30 @@ cloze_dir = 'results/cloze'
 total_dir = 'results/total'
 
 for iChan in range(NCHAN):
-    chan_result_control_yesno_FE = np.zeros(int(NPART/2))
-    chan_result_control_yesno_VB = np.zeros(int(NPART/2))
-    chan_result_treatment_yesno_FE = np.zeros(int(NPART/2))
-    chan_result_treatment_yesno_VB = np.zeros(int(NPART/2))
+    chan_result_control_yesno_FE = []
+    chan_result_control_yesno_VB = []
+    chan_result_treatment_yesno_FE = []
+    chan_result_treatment_yesno_VB = []
 
-    chan_result_control_open_FE = np.zeros(int(NPART/2))
-    chan_result_control_open_VB = np.zeros(int(NPART/2))
-    chan_result_treatment_open_FE = np.zeros(int(NPART/2))
-    chan_result_treatment_open_VB = np.zeros(int(NPART/2))
+    chan_result_control_open_FE = []
+    chan_result_control_open_VB = []
+    chan_result_treatment_open_FE = []
+    chan_result_treatment_open_VB = []
 
-    chan_result_control_cloze_FE = np.zeros(int(NPART/2))
-    chan_result_control_cloze_VB = np.zeros(int(NPART/2))
-    chan_result_treatment_cloze_FE = np.zeros(int(NPART/2))
-    chan_result_treatment_cloze_VB = np.zeros(int(NPART/2))
+    chan_result_control_cloze_FE = []
+    chan_result_control_cloze_VB = []
+    chan_result_treatment_cloze_FE = []
+    chan_result_treatment_cloze_VB = []
 
-    chan_result_control_total_FE = np.zeros(int(NPART/2))
-    chan_result_control_total_VB = np.zeros(int(NPART/2))
-    chan_result_treatment_total_FE = np.zeros(int(NPART/2))
-    chan_result_treatment_total_VB = np.zeros(int(NPART/2))    
+    chan_result_control_total_FE = []
+    chan_result_control_total_VB = []
+    chan_result_treatment_total_FE = []
+    chan_result_treatment_total_VB = []
 
     for iPart in range(int(NPART/2)):
+        if all(v == 0 for v in values):
+            continue
+
         control_baseline_FE = control["control_baseline_powers_FE"][iPart, iChan, :]
         control_baseline_VB = control["control_baseline_powers_VB"][iPart, iChan, :]
         treatment_baseline_FE = treatment["treatment_baseline_powers_FE"][iPart, iChan, :]
@@ -158,25 +161,25 @@ for iChan in range(NCHAN):
         eeg_ei_treatment_total_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_total_powers_FE"][iPart, iChan, :])
         eeg_ei_treatment_total_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_total_powers_VB"][iPart, iChan, :])
 
-        chan_result_control_yesno_FE[iPart] = eeg_ei_control_yesno_FE_corrected
-        chan_result_control_yesno_VB[iPart] = eeg_ei_control_yesno_VB_corrected
-        chan_result_treatment_yesno_FE[iPart] = eeg_ei_treatment_yesno_FE_corrected
-        chan_result_treatment_yesno_VB[iPart] = eeg_ei_treatment_yesno_VB_corrected
+        chan_result_control_yesno_FE.append(eeg_ei_control_yesno_FE_corrected)
+        chan_result_control_yesno_VB.append(eeg_ei_control_yesno_VB_corrected)
+        chan_result_treatment_yesno_FE.append(eeg_ei_treatment_yesno_FE_corrected)
+        chan_result_treatment_yesno_VB.append(eeg_ei_treatment_yesno_VB_corrected)
 
-        chan_result_control_open_FE[iPart] = eeg_ei_control_open_FE_corrected
-        chan_result_control_open_VB[iPart] = eeg_ei_control_open_VB_corrected
-        chan_result_treatment_open_FE[iPart] = eeg_ei_treatment_open_FE_corrected
-        chan_result_treatment_open_VB[iPart] = eeg_ei_treatment_open_VB_corrected
+        chan_result_control_open_FE.append(eeg_ei_control_open_FE_corrected)
+        chan_result_control_open_VB.append(eeg_ei_control_open_VB_corrected)
+        chan_result_treatment_open_FE.append(eeg_ei_treatment_open_FE_corrected)
+        chan_result_treatment_open_VB.append(eeg_ei_treatment_open_VB_corrected)
 
-        chan_result_control_cloze_FE[iPart] = eeg_ei_control_cloze_FE_corrected
-        chan_result_control_cloze_VB[iPart] = eeg_ei_control_cloze_VB_corrected
-        chan_result_treatment_cloze_FE[iPart] = eeg_ei_treatment_cloze_FE_corrected
-        chan_result_treatment_cloze_VB[iPart] = eeg_ei_treatment_cloze_VB_corrected
+        chan_result_control_cloze_FE.append(eeg_ei_control_cloze_FE_corrected)
+        chan_result_control_cloze_VB.append(eeg_ei_control_cloze_VB_corrected)
+        chan_result_treatment_cloze_FE.append(eeg_ei_treatment_cloze_FE_corrected)
+        chan_result_treatment_cloze_VB.append(eeg_ei_treatment_cloze_VB_corrected)
 
-        chan_result_control_total_FE[iPart] = eeg_ei_control_total_FE_corrected
-        chan_result_control_total_VB[iPart] = eeg_ei_control_total_VB_corrected
-        chan_result_treatment_total_FE[iPart] = eeg_ei_treatment_total_FE_corrected
-        chan_result_treatment_total_VB[iPart] = eeg_ei_treatment_total_VB_corrected
+        chan_result_control_total_FE.append(eeg_ei_control_total_FE_corrected)
+        chan_result_control_total_VB.append(eeg_ei_control_total_VB_corrected)
+        chan_result_treatment_total_FE.append(eeg_ei_treatment_total_FE_corrected)
+        chan_result_treatment_total_VB.append(eeg_ei_treatment_total_VB_corrected)
 
     figure_yesno = generate_boxplot(chan_result_control_yesno_FE, chan_result_treatment_yesno_FE, chan_result_control_yesno_VB, chan_result_treatment_yesno_VB, iChan, yesno_dir)
     anova_yesno = run_anova(chan_result_control_yesno_FE, chan_result_treatment_yesno_FE, chan_result_control_yesno_VB, chan_result_treatment_yesno_VB, iChan, yesno_dir)

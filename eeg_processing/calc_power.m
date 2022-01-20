@@ -67,12 +67,21 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
 
         if cond == "baseline"
             for chan = 1:nChans
+                all_zero = all(EEG_data(chan,:) == 0);
+                if all_zero
+                    if mod == "FE"
+                        baseline_powers_FE(part,chan,1:3) = 0;
+                        continue;
+                    elseif mod == "VB"
+                        baseline_powers_VB(part,chan,1:3) = 0;
+                    end
+                end
                 [thetaPower, alphaPower, betaPower] = calculate_powers(EEG_data, chan, srate);
-                if mod == "FE"
+                if mod == "FE" && ~all_zero
                     baseline_powers_FE(part, chan, 1) = thetaPower;
                     baseline_powers_FE(part, chan, 2) = alphaPower;
                     baseline_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
+                elseif mod == "VB" && ~all_zero
                     baseline_powers_VB(part, chan, 1) = thetaPower;
                     baseline_powers_VB(part, chan, 2) = alphaPower;
                     baseline_powers_VB(part, chan, 3) = betaPower;
@@ -81,45 +90,58 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         elseif cond == "model"
             [yesno, open, cloze, total] = extract_model_tasks(EEG_data, keys);
             for chan = 1:nChans
+                if all_zero
+                    if mod == "FE"
+                        yesno_powers_FE(part,chan,1:3) = 0;
+                        open_powers_FE(part,chan,1:3) = 0;
+                        cloze_powers_FE(part,chan,1:3) = 0;
+                        total_powers_FE(part,chan,1:3) = 0;
+                    elseif mod == "VB"
+                        yesno_powers_VB(part,chan,1:3) = 0;
+                        open_powers_VB(part,chan,1:3) = 0;
+                        cloze_powers_VB(part,chan,1:3) = 0;
+                        total_powers_VB(part,chan,1:3) = 0;
+                    end
+                end
                 [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
-                if mod == "FE"
+                if mod == "FE" && ~all_zero
                     yesno_powers_FE(part, chan, 1) = thetaPower;
                     yesno_powers_FE(part, chan, 2) = alphaPower;
                     yesno_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
+                elseif mod == "VB" && ~all_zero
                     yesno_powers_VB(part, chan, 1) = thetaPower;
                     yesno_powers_VB(part, chan, 2) = alphaPower;
                     yesno_powers_VB(part, chan, 3) = betaPower;
                 end
 
                 [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
-                if mod == "FE"
+                if mod == "FE" && ~all_zero
                     open_powers_FE(part, chan, 1) = thetaPower;
                     open_powers_FE(part, chan, 2) = alphaPower;
                     open_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
+                elseif mod == "VB" && ~all_zero
                     open_powers_VB(part, chan, 1) = thetaPower;
                     open_powers_VB(part, chan, 2) = alphaPower;
                     open_powers_VB(part, chan, 3) = betaPower;
                 end
 
                 [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
-                if mod == "FE"
+                if mod == "FE" && ~all_zero
                     cloze_powers_FE(part, chan, 1) = thetaPower;
                     cloze_powers_FE(part, chan, 2) = alphaPower;
                     cloze_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
+                elseif mod == "VB" && ~all_zero
                     cloze_powers_VB(part, chan, 1) = thetaPower;
                     cloze_powers_VB(part, chan, 2) = alphaPower;
                     cloze_powers_VB(part, chan, 3) = betaPower;
                 end
 
                 [thetaPower, alphaPower, betaPower] = calculate_powers(total, chan, srate);
-                if mod == "FE"
+                if mod == "FE" && ~all_zero
                     total_powers_FE(part, chan, 1) = thetaPower;
                     total_powers_FE(part, chan, 2) = alphaPower;
                     total_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB"
+                elseif mod == "VB" && ~all_zero
                     total_powers_VB(part, chan, 1) = thetaPower;
                     total_powers_VB(part, chan, 2) = alphaPower;
                     total_powers_VB(part, chan, 3) = betaPower;
