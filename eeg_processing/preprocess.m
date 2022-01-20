@@ -6,7 +6,7 @@ dir_treatment = "data/treatment";
 dir_control_processed = "processed-data/control";
 dir_treatment_processed = "processed-data/treatment";
 
-% process_control = process_dir(dir_control, dir_control_processed);
+process_control = process_dir(dir_control, dir_control_processed);
 process_treatment = process_dir(dir_treatment, dir_treatment_processed);
 
 function processed = process_dir(data_dir, processed_dir)
@@ -56,8 +56,6 @@ function processed = process_dir(data_dir, processed_dir)
         elseif size(filedata,1) == 27
             eeg_data = filedata(3:18,:);
         end
-  
-    
 
         % Remove first and last 10 seconds
         eeg_data = eeg_data(:,begintime_i:endtime_i);
@@ -84,8 +82,8 @@ function processed = process_dir(data_dir, processed_dir)
         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
 
         % Temporal rejection
-        global rej
-        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs);
+        global rej;
+        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs, 'winlength',10);
         uiwait;
         tmprej = eegplot2event(rej, -1);
         [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
@@ -93,11 +91,17 @@ function processed = process_dir(data_dir, processed_dir)
         for iRej = 1:size(tmprej,1)
             rej_start = tmprej(iRej, 3);
             rej_stop = tmprej(iRej, 4);
+            if strfind(keys(rej_start:rej_stop),[66 69]) ~= []
+                keys(rej_start-2:rej_start-1) = [66 69];
+            end
+            if strfind(keys(rej_start:rej_stop),[69 66]) ~= []
+                keys(rej_stop+1:rej_stop+2) = [69 66];
+            end
             keys(rej_start:rej_stop) = [];
             time(rej_start:rej_stop) = [];
         end
 
-        if size(EEG.data,2) ~= size(keys,2) || size(EEG.data,2) ~= size(time,2)
+        if size(EEG.data,2) ~= size(keys,2) || size(EEG.data,2) ~= size(time,2) || size(keys,2) ~= size(time,2)
             error("Dimensions not the same after rejection");
         end
 
@@ -105,7 +109,7 @@ function processed = process_dir(data_dir, processed_dir)
 
         % Run ICA
         EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1);
-        pop_eegplot(EEG, 0);
+        pop_eegplot(EEG, 0, 'winlength',10);
         pop_topoplot(EEG, 0, 1:16);
         EEG = pop_subcomp(EEG);
         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-icapruned'); % Now CURRENTSET= 2
