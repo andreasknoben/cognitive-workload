@@ -47,6 +47,19 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         disp(strcat("Processing ", filename))
 
         [subj, cond, mod] = process_filename(files(i).name);
+
+        ch1rej = [21 22 23];
+        ch26rej = [48 49 50 51];
+        ch32rej = [18 29 30 31 32 33];
+
+        if ismember(subj, ch1rej)
+            EEG_data = [zeros(size(EEG_data(1,:))), EEG_data];
+        elseif ismember(subj, ch26rej)
+            EEG_data = [EEG_data(1:13,:), zeros(size(EEG_data(1,:))), EEG_data(14:16,:)];
+        elseif ismember(subj, ch32rej)
+            EEG_data = [EEG_data(1:15,:), zeros(size(EEG_data(1,:)))];
+        end
+
         curr_subj = subj;
         if curr_subj ~= prev_subj
             part = part + 1;
