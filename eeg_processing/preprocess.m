@@ -65,10 +65,28 @@ function processed = process_dir(data_dir, processed_dir)
         EEG = pop_importdata('dataformat','array','data',eeg_data,'srate',250,'setname',file,'chanlocs',EEG_chanlocs);
         [ALLEEG EEG CURRENTSET ] = eeg_store(ALLEEG, EEG);
 
-%         % Filter EEG data with bandpass 0.5-60Hz
-%         EEG = pop_eegfilt(EEG, 0.5, 60, [], [0]);
-%         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered'); % Now CURRENTSET= 2
-%         EEG = pop_reref( EEG, [], 'refstate',0);
+        EEG = pop_eegfiltnew(EEG, 'locutoff', 0.5, 'hicutoff', 60);
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
+
+        % Temporal rejection
+        global rej
+        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs);
+        uiwait;
+        tmprej = eegplot2event(rej, -1);
+        [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
+        
+        for iRej = 1:size(tmprej,1)
+            rej_start = tmprej(iRej, 3);
+            rej_stop = tmprej(iRej, 4);
+            keys(rej_start:rej_stop) = [];
+            time(rej_start:rej_stop) = [];
+        end
+
+        if size(EEG.data,2) ~= size(keys,2) || size(EEG.data,2) ~= size(time,2)
+            error("Dimensions not the same after rejection");
+        end
+
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
 
         % Run ICA
         EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1);
