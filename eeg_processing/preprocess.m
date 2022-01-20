@@ -33,6 +33,7 @@ function processed = process_dir(data_dir, processed_dir)
     for file = files
         % Extract basic file data (name, path, data)
         filename = string(file{1});
+        [subj, cond, mod] = process_filename(filename);
         filepath = strcat(data_dir, "/", file);
         disp(strcat("Loading file ", filepath));
         filedata = load(filepath).y;
@@ -55,6 +56,8 @@ function processed = process_dir(data_dir, processed_dir)
         elseif size(filedata,1) == 27
             eeg_data = filedata(3:18,:);
         end
+  
+    
 
         % Remove first and last 10 seconds
         eeg_data = eeg_data(:,begintime_i:endtime_i);
@@ -64,6 +67,18 @@ function processed = process_dir(data_dir, processed_dir)
         % Load EEG data into EEGLab (into EEG struct)
         EEG = pop_importdata('dataformat','array','data',eeg_data,'srate',250,'setname',file,'chanlocs',EEG_chanlocs);
         [ALLEEG EEG CURRENTSET ] = eeg_store(ALLEEG, EEG);
+
+        % Remove specific channnels
+        ch1rej = [21 22 23];
+        ch26rej = [48 49 50 51];
+        ch32rej = [18 29 30 31 32 33];
+        if ismember(subj, ch1rej)
+            EEG = pop_select(EEG, 'nochannel', 1);
+        elseif ismember(subj, ch26rej)
+            EEG = pop_select(EEG, 'nochannel', 13);
+        elseif ismember(subj, ch32rej)
+            EEG = pop_select(EEG, 'nochannel', 16);
+        end
 
         EEG = pop_eegfiltnew(EEG, 'locutoff', 0.5, 'hicutoff', 60);
         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
@@ -106,4 +121,24 @@ function processed = process_dir(data_dir, processed_dir)
         
     end
     processed = 1;
+end
+
+function [subj, cond, mod] = process_filename(filename)
+    fn_string = string(filename);
+    fn_char = char(filename);
+
+    subj_str = extractBetween(fn_string,5,7);
+    subj = str2num(subj_str);
+
+    if fn_char(9) == "b"
+        cond = "baseline";
+    elseif fn_char(9) == "m"
+        cond = "model";
+    end
+
+    if endsWith(fn_string, "FE.mat")
+        mod = "FE";
+    elseif endsWith(fn_string, "VB.mat")
+        mod = "VB";
+    end
 end
