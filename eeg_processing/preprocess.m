@@ -86,19 +86,21 @@ function processed = process_dir(data_dir, processed_dir)
         eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs, 'winlength',10);
         uiwait;
         tmprej = eegplot2event(rej, -1);
-        [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
-        
-        for iRej = 1:size(tmprej,1)
-            rej_start = tmprej(iRej, 3);
-            rej_stop = tmprej(iRej, 4);
-            if strfind(keys(rej_start:rej_stop),[66 69]) ~= []
-                keys(rej_start-2:rej_start-1) = [66 69];
+        if ~isempty(tmprej)
+            [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
+            
+            for iRej = 1:size(tmprej,1)
+                rej_start = tmprej(iRej, 3);
+                rej_stop = tmprej(iRej, 4);
+                if strfind(keys(rej_start:rej_stop),[66 69]) ~= []
+                    keys(rej_start-2:rej_start-1) = [66 69];
+                end
+                if strfind(keys(rej_start:rej_stop),[69 66]) ~= []
+                    keys(rej_stop+1:rej_stop+2) = [69 66];
+                end
+                keys(rej_start:rej_stop) = [];
+                time(rej_start:rej_stop) = [];
             end
-            if strfind(keys(rej_start:rej_stop),[69 66]) ~= []
-                keys(rej_stop+1:rej_stop+2) = [69 66];
-            end
-            keys(rej_start:rej_stop) = [];
-            time(rej_start:rej_stop) = [];
         end
 
         if size(EEG.data,2) ~= size(keys,2) || size(EEG.data,2) ~= size(time,2) || size(keys,2) ~= size(time,2)

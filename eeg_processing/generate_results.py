@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.io
+import scipy.stats as stats
 
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
@@ -59,18 +60,20 @@ def run_anova(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
         anova (anova_lm object): run anova
     '''
 
-    data_df = pd.DataFrame({'condition': np.repeat(["control", "treatment"], 42),
-        'model': np.repeat(["FE", "VB", "FE", "VB"], 21),
-        'index': np.concatenate([control_FE, control_VB, treatment_FE, treatment_VB])})
+    # data_df = pd.DataFrame({'condition': np.repeat(["control", "treatment"], 42),
+    #    'model': np.repeat(["FE", "VB", "FE", "VB"], 21),
+    #    'index': np.concatenate([control_FE, control_VB, treatment_FE, treatment_VB])})
 
-    model = ols('index ~ C(condition) + C(model) + C(condition):C(model)', data=data_df).fit()
-    anova = sm.stats.anova_lm(model, typ=2)
+    #model = ols('index ~ C(condition) + C(model) + C(condition):C(model)', data=data_df).fit()
+    #anova = sm.stats.anova_lm(model, typ=2)
 
-    with open('{}/anova.txt'.format(dir), 'a') as resultsfile:
-        resultsfile.write("\nANOVA results for channel {}\n".format(CHANS[chan]))
-        resultsfile.write(str(anova))
+    test = stats.mannwhitneyu(control_FE, treatment_FE)
+
+    with open('{}/mannwhitney.txt'.format(dir), 'a') as resultsfile:
+        resultsfile.write("\nMann-Whitney results for channel {}\n".format(CHANS[chan]))
+        resultsfile.write(str(test))
         resultsfile.write("\n")
-    return anova
+    return test
 
 def generate_boxplot(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
     '''
@@ -87,19 +90,36 @@ def generate_boxplot(control_FE, treatment_FE, control_VB, treatment_VB, chan, d
     Returns:
         fig (pyplot): created figure
     '''
-    data = [control_FE, treatment_FE, control_VB, treatment_VB]
 
-    fig, ax = plt.subplots(figsize = (5,5), nrows = 1, ncols = 1)
-    bp = ax.boxplot(data, positions = [0.8, 1.5, 2.5, 3.2], patch_artist = True, widths = 0.6)
+    #data = [control_FE, treatment_FE, control_VB, treatment_VB]
 
-    colours = ['coral', 'orangered', 'lightskyblue', 'deepskyblue']
+    #fig, ax = plt.subplots(figsize = (5,5), nrows = 1, ncols = 1)
+    #bp = ax.boxplot(data, positions = [0.8, 1.5, 2.5, 3.2], patch_artist = True, widths = 0.6)
+
+    #colours = ['coral', 'orangered', 'lightskyblue', 'deepskyblue']
+    #for patch, colour in zip(bp['boxes'], colours):
+        #patch.set_facecolor(colour)
+
+    #plt.xticks([])
+    #plt.yticks(fontsize = 14)
+    #plt.title("Channel {}".format(CHANS[chan]), fontsize = 28)
+    #plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]))
+    #plt.close(fig)
+    #return fig
+
+    data = [control_FE, treatment_FE]
+
+    fig, ax = plt.subplots(figsize = (3,4), nrows = 1, ncols = 1)
+    bp = ax.boxplot(data, patch_artist = True, widths = 0.4, medianprops=dict(color="red", alpha=0.7))
+
+    colours = ['skyblue', 'seagreen']
     for patch, colour in zip(bp['boxes'], colours):
         patch.set_facecolor(colour)
 
     plt.xticks([])
-    plt.yticks(fontsize = 14)
-    plt.title("Channel {}".format(CHANS[chan]), fontsize = 28)
-    plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]))
+    plt.yticks(fontsize = 20)
+    plt.title("{}".format(CHANS[chan]), fontsize = 28)
+    plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]), bbox_inches='tight')
     plt.close(fig)
     return fig
 
@@ -133,7 +153,7 @@ for iChan in range(NCHAN):
     chan_result_treatment_total_VB = []
 
     for iPart in range(int(NPART/2)):
-        if all(v == 0 for v in values):
+        if all(v == 0 for v in control["control_baseline_powers_FE"][iPart, iChan, :]):
             continue
 
         control_baseline_FE = control["control_baseline_powers_FE"][iPart, iChan, :]
