@@ -35,7 +35,7 @@ function processed = process_dir(data_dir, processed_dir)
         filename = string(file{1});
         [subj, cond, mod] = process_filename(filename);
         filepath = strcat(data_dir, "/", file);
-        disp(strcat("Loading file ", filepath));
+        disp(strcat("[INFO] Loading file ", filepath));
         filedata = load(filepath).y;
 
         % Set up time indices to prepare for removal of first and last 10s
@@ -78,43 +78,53 @@ function processed = process_dir(data_dir, processed_dir)
             EEG = pop_select(EEG, 'nochannel', 16);
         end
 
+        % Bandpass filter 0.5-60Hz
         EEG = pop_eegfiltnew(EEG, 'locutoff', 0.5, 'hicutoff', 60);
         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
 
+        % Convert keypresses to EEGLAB events
+        if cond == "model"
+            begin_first_task = strfind(keys, [0 66]);
+            if isempty(begin_first_task)
+                begin_first_task = [500];
+            end
+            begin_other_task = strfind(keys, [69 66]);
+            begin_task = [begin_first_task begin_other_task];
+            end_other_task = strfind(keys, [66 69]);
+            if length(end_other_task) ~= 5
+                end_final_task = length(keys) - 10;
+            end
+            end_task = [end_other_task end_final_task];
+        end
+
+        EEG = eeg_addnewevents(EEG, {begin_task, end_task}, {'begin', 'end'});
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered');
+
         % Temporal rejection
         global rej;
-        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs, 'winlength',10);
+        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs, 'winlength',10, 'events', EEG.event);
         uiwait;
         tmprej = eegplot2event(rej, -1);
         if ~isempty(tmprej)
             [EEG,~] = eeg_eegrej(EEG,tmprej(:,[3 4]));
+            rejection = zeros(1,length(time));
             
             for iRej = 1:size(tmprej,1)
                 rej_start = tmprej(iRej, 3);
                 rej_stop = tmprej(iRej, 4);
-                if strfind(keys(rej_start:rej_stop),[66 69]) ~= []
-                    keys(rej_start-2:rej_start-1) = [66 69];
-                end
-                if strfind(keys(rej_start:rej_stop),[69 66]) ~= []
-                    keys(rej_stop+1:rej_stop+2) = [69 66];
-                end
-                keys(rej_start:rej_stop) = [];
-                time(rej_start:rej_stop) = [];
+                rejection(rej_start:rej_stop) = 1;
             end
+            time(rejection == 1) = []; 
         end
 
-        if size(EEG.data,2) ~= size(keys,2) || size(EEG.data,2) ~= size(time,2) || size(keys,2) ~= size(time,2)
-            error("Dimensions not the same after rejection");
-        end
-
-        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-rejected');
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered-rejected');
 
         % Run ICA
         EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1);
         pop_eegplot(EEG, 0, 'winlength',10);
         pop_topoplot(EEG, 0, 1:16);
         EEG = pop_subcomp(EEG);
-        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'data-filtered-icapruned'); % Now CURRENTSET= 2
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered-icapruned'); % Now CURRENTSET= 2
         EEG = pop_reref( EEG, [], 'refstate',0);
 
         % Prepare EEG struct for storage
