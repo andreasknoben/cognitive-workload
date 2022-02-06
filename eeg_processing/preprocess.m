@@ -21,11 +21,11 @@ function processed = process_dir(data_dir, processed_dir)
     pop_editoptions('option_storedisk', 0);
 
     % Load channel locations
-    chanlocs = struct('labels', { 'Fp1' 'Fp2' 'F3' 'Fz' 'F4' 'T7' 'C3' 'Cz' 'C4' 'T8' 'P3' 'Pz' 'P4' 'PO7' 'PO8' 'Oz'});
+    chanlocs = struct('labels', {'Fp1' 'Fp2' 'F3' 'Fz' 'F4' 'T7' 'C3' 'Cz' 'C4' 'T8' 'P3' 'Pz' 'P4' 'PO7' 'PO8' 'Oz'});
     EEG_chanlocs = pop_chanedit(chanlocs, 'load', 'chan_locs.elc');
 
     % Initialise channels, files, begin time variables
-    channels = [1,2,6,7,8,14,15,16,17,18,24,25,26,28,31,32];
+    channels = [1 2 6 7 8 14 15 16 17 18 24 25 26 28 31 32];
     files = {dir(data_dir + "/*.mat").name};
     begintime = 10;
 
@@ -63,19 +63,23 @@ function processed = process_dir(data_dir, processed_dir)
         time = time(:,begintime_i:endtime_i);
 
         % Load EEG data into EEGLab (into EEG struct)
-        EEG = pop_importdata('dataformat','array','data',eeg_data,'srate',250,'setname',file,'chanlocs',EEG_chanlocs);
-        [ALLEEG EEG CURRENTSET ] = eeg_store(ALLEEG, EEG);
+        EEG = pop_importdata('dataformat', 'array', 'data', eeg_data, 'srate', 250, 'setname', file, 'chanlocs', EEG_chanlocs);
+        [ALLEEG EEG CURRENTSET] = eeg_store(ALLEEG, EEG);
 
         % Remove specific channnels
+        nchan = 16;
         ch1rej = [21 22 23];
         ch26rej = [48 49 50 51];
         ch32rej = [18 29 30 31 32 33];
         if ismember(subj, ch1rej)
             EEG = pop_select(EEG, 'nochannel', 1);
+            nchan = nchan - 1;
         elseif ismember(subj, ch26rej)
             EEG = pop_select(EEG, 'nochannel', 13);
+            nchan = nchan - 1;
         elseif ismember(subj, ch32rej)
             EEG = pop_select(EEG, 'nochannel', 16);
+            nchan = nchan - 1;
         end
 
         % Bandpass filter 0.5-60Hz
@@ -86,23 +90,25 @@ function processed = process_dir(data_dir, processed_dir)
         if cond == "model"
             begin_first_task = strfind(keys, [0 66]);
             if isempty(begin_first_task)
-                begin_first_task = [500];
+                begin_first_task = 500;
             end
             begin_other_task = strfind(keys, [69 66]);
             begin_task = [begin_first_task begin_other_task];
             end_other_task = strfind(keys, [66 69]);
             if length(end_other_task) ~= 5
                 end_final_task = length(keys) - 10;
+                end_task = [end_other_task end_final_task];
+            else
+                end_task = end_other_task;
             end
-            end_task = [end_other_task end_final_task];
-        end
 
-        EEG = eeg_addnewevents(EEG, {begin_task, end_task}, {'begin', 'end'});
-        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered');
+            EEG = eeg_addnewevents(EEG, {begin_task, end_task}, {'begin', 'end'});
+            [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered');
+        end
 
         % Temporal rejection
         global rej;
-        eegplot(EEG.data, 'srate', EEG.srate, 'command','global rej,rej=TMPREJ', 'eloc_file',EEG.chanlocs, 'winlength',10, 'events', EEG.event);
+        eegplot(EEG.data, 'srate', EEG.srate, 'command', 'global rej,rej=TMPREJ', 'eloc_file', EEG.chanlocs, 'winlength', 10, 'events', EEG.event);
         uiwait;
         tmprej = eegplot2event(rej, -1);
         if ~isempty(tmprej)
@@ -114,6 +120,7 @@ function processed = process_dir(data_dir, processed_dir)
                 rej_stop = tmprej(iRej, 4);
                 rejection(rej_start:rej_stop) = 1;
             end
+
             time(rejection == 1) = []; 
         end
 
@@ -121,19 +128,19 @@ function processed = process_dir(data_dir, processed_dir)
 
         % Run ICA
         EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1);
-        pop_eegplot(EEG, 0, 'winlength',10);
-        pop_topoplot(EEG, 0, 1:16);
+        pop_eegplot(EEG, 0, 'winlength', 10);
+        pop_topoplot(EEG, 0, 1:nchan);
         EEG = pop_subcomp(EEG);
-        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered-icapruned'); % Now CURRENTSET= 2
-        EEG = pop_reref( EEG, [], 'refstate',0);
+        [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered-icapruned');
+        EEG = pop_reref(EEG, [], 'refstate', 0);
 
         % Prepare EEG struct for storage
         proc_filename = strcat(processed_dir, "/", filename);
-        EEG.timev = time;
-        EEG.keyv = keys;
+        EEG.timevec = time;
+        EEG.urkeys = keys;
 
         % Store processed EEG data
-        save(proc_filename, 'EEG')
+        save(proc_filename, 'EEG');
         
     end
     processed = 1;
@@ -143,7 +150,7 @@ function [subj, cond, mod] = process_filename(filename)
     fn_string = string(filename);
     fn_char = char(filename);
 
-    subj_str = extractBetween(fn_string,5,7);
+    subj_str = extractBetween(fn_string, 5, 7);
     subj = str2num(subj_str);
 
     if fn_char(9) == "b"
