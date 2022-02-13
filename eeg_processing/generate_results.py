@@ -8,7 +8,7 @@ import datetime
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 
-NPART = 42
+NPART = 58
 NCHAN = 16
 NPOWS = 3
 CHANS = ['Fp1', 'Fp2', 'F3', 'Fz', 'F4', 'T7', 'C3', 'Cz', 'C4', 'T8', 'P3', 'Pz', 'P4', 'PO7', 'PO8', 'Oz']
@@ -61,25 +61,12 @@ def run_test(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
         test (object)
     '''
 
-    # stats.probplot(control_FE, dist = "norm", plot = plt)
-    # plt.title("control_FE")
-    # plt.savefig("normplot-control_FE.png")
-    # plt.close()
+    # print(stats.shapiro(control_FE))
+    # print(stats.shapiro(treatment_FE))
+    # print(stats.shapiro(control_VB))
+    # print(stats.shapiro(treatment_VB))
 
-    # stats.probplot(treatment_FE, dist = "norm", plot = plt)
-    # plt.title("treatment_FE")
-    # plt.savefig("normplot-treatment_FE.png")
-    # plt.close()
-
-    # stats.probplot(control_VB, dist = "norm", plot = plt)
-    # plt.title("control_VB")
-    # plt.savefig("normplot-control_VB.png")
-    # plt.close()
-
-    # stats.probplot(treatment_VB, dist = "norm", plot = plt)
-    # plt.title("treatment_VB")
-    # plt.savefig("normplot-treatment_VB.png")
-    # plt.close()
+    # print("CHANNEL {}\nControl FE\t{}\nTreatment FE\t{}\nControl VB\t{}\nTreatment VB\t{}\n".format(CHANS[chan], len(control_FE), len(treatment_FE), len(control_VB), len(treatment_FE)))
 
     test = stats.kruskal(control_FE, treatment_FE, control_VB, treatment_VB)
 
