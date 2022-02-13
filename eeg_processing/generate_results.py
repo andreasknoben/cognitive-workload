@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.io
 import scipy.stats as stats
+import datetime
 
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
@@ -44,10 +45,10 @@ def calc_results(baseline, task):
     eeg_ei_controlled = eeg_ei_task - eeg_ei_baseline
     return eeg_ei_controlled
     
-def run_anova(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
+def run_test(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
     '''
-    Runs a two-way ANOVA on the data.
-    Writes the results to a file results/anova.txt.
+    Runs a statistical test on the data.
+    Writes the results to a file results/testresult.txt.
 
     Parameters:
         control_FE (array): array of EEG engagement indices for control, FE model for a specific channel
@@ -57,22 +58,36 @@ def run_anova(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
         chan (int): index of current channel
 
     Returns:
-        anova (anova_lm object): run anova
+        test (object)
     '''
 
-    # data_df = pd.DataFrame({'condition': np.repeat(["control", "treatment"], 42),
-    #    'model': np.repeat(["FE", "VB", "FE", "VB"], 21),
-    #    'index': np.concatenate([control_FE, control_VB, treatment_FE, treatment_VB])})
+    # stats.probplot(control_FE, dist = "norm", plot = plt)
+    # plt.title("control_FE")
+    # plt.savefig("normplot-control_FE.png")
+    # plt.close()
 
-    #model = ols('index ~ C(condition) + C(model) + C(condition):C(model)', data=data_df).fit()
-    #anova = sm.stats.anova_lm(model, typ=2)
+    # stats.probplot(treatment_FE, dist = "norm", plot = plt)
+    # plt.title("treatment_FE")
+    # plt.savefig("normplot-treatment_FE.png")
+    # plt.close()
 
-    test = stats.mannwhitneyu(control_FE, treatment_FE)
+    # stats.probplot(control_VB, dist = "norm", plot = plt)
+    # plt.title("control_VB")
+    # plt.savefig("normplot-control_VB.png")
+    # plt.close()
 
-    with open('{}/mannwhitney.txt'.format(dir), 'a') as resultsfile:
-        resultsfile.write("\nMann-Whitney results for channel {}\n".format(CHANS[chan]))
+    # stats.probplot(treatment_VB, dist = "norm", plot = plt)
+    # plt.title("treatment_VB")
+    # plt.savefig("normplot-treatment_VB.png")
+    # plt.close()
+
+    test = stats.kruskal(control_FE, treatment_FE, control_VB, treatment_VB)
+
+    with open('{}/testresult.txt'.format(dir), 'a') as resultsfile:
+        resultsfile.write("\ntest results for channel {}\n".format(CHANS[chan]))
         resultsfile.write(str(test))
         resultsfile.write("\n")
+
     return test
 
 def generate_boxplot(control_FE, treatment_FE, control_VB, treatment_VB, chan, dir):
@@ -91,37 +106,25 @@ def generate_boxplot(control_FE, treatment_FE, control_VB, treatment_VB, chan, d
         fig (pyplot): created figure
     '''
 
-    #data = [control_FE, treatment_FE, control_VB, treatment_VB]
+    data = [control_FE, treatment_FE, control_VB, treatment_VB]
 
-    #fig, ax = plt.subplots(figsize = (5,5), nrows = 1, ncols = 1)
-    #bp = ax.boxplot(data, positions = [0.8, 1.5, 2.5, 3.2], patch_artist = True, widths = 0.6)
+    fig, ax = plt.subplots(figsize = (5,5), nrows = 1, ncols = 1)
+    bp = ax.boxplot(data, positions = [0.8, 1.5, 2.5, 3.2], patch_artist = True, widths = 0.6)
 
-    #colours = ['coral', 'orangered', 'lightskyblue', 'deepskyblue']
-    #for patch, colour in zip(bp['boxes'], colours):
-        #patch.set_facecolor(colour)
-
-    #plt.xticks([])
-    #plt.yticks(fontsize = 14)
-    #plt.title("Channel {}".format(CHANS[chan]), fontsize = 28)
-    #plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]))
-    #plt.close(fig)
-    #return fig
-
-    data = [control_FE, treatment_FE]
-
-    fig, ax = plt.subplots(figsize = (3,4), nrows = 1, ncols = 1)
-    bp = ax.boxplot(data, patch_artist = True, widths = 0.4, medianprops=dict(color="red", alpha=0.7))
-
-    colours = ['skyblue', 'seagreen']
+    colours = ['coral', 'orangered', 'lightskyblue', 'deepskyblue']
     for patch, colour in zip(bp['boxes'], colours):
         patch.set_facecolor(colour)
 
     plt.xticks([])
-    plt.yticks(fontsize = 20)
-    plt.title("{}".format(CHANS[chan]), fontsize = 28)
-    plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]), bbox_inches='tight')
+    plt.yticks(fontsize = 14)
+    plt.title("Channel {}".format(CHANS[chan]), fontsize = 28)
+    plt.savefig("{}/chan{}.png".format(dir, CHANS[chan]))
     plt.close(fig)
     return fig
+
+def empty_results_file(dir):
+    with open('{}/testresult.txt'.format(dir), 'w') as resultsfile:
+        resultsfile.write("RESULTS GENERATED ON {}".format(datetime.time))
 
 control = scipy.io.loadmat('powers/control.mat')
 treatment = scipy.io.loadmat('powers/treatment.mat')
@@ -130,6 +133,9 @@ yesno_dir = 'results/yesno'
 open_dir = 'results/open'
 cloze_dir = 'results/cloze'
 total_dir = 'results/total'
+
+for dir in [yesno_dir, open_dir, cloze_dir, total_dir]:
+    empty_results_file(dir)
 
 for iChan in range(NCHAN):
     chan_result_control_yesno_FE = []
@@ -153,62 +159,69 @@ for iChan in range(NCHAN):
     chan_result_treatment_total_VB = []
 
     for iPart in range(int(NPART/2)):
-        if all(v == 0 for v in control["control_baseline_powers_FE"][iPart, iChan, :]):
+        if np.isnan(control["control_baseline_powers_FE"][iPart, iChan, 0]):
+            print("Control all zero")
             continue
 
         control_baseline_FE = control["control_baseline_powers_FE"][iPart, iChan, :]
         control_baseline_VB = control["control_baseline_powers_VB"][iPart, iChan, :]
+        eeg_ei_control_yesno_FE_corrected = calc_results(control_baseline_FE, control["control_yesno_powers_FE"][iPart, iChan, :])
+        eeg_ei_control_yesno_VB_corrected = calc_results(control_baseline_VB, control["control_yesno_powers_VB"][iPart, iChan, :])
+        eeg_ei_control_open_FE_corrected = calc_results(control_baseline_FE, control["control_open_powers_FE"][iPart, iChan, :])
+        eeg_ei_control_open_VB_corrected = calc_results(control_baseline_VB, control["control_open_powers_VB"][iPart, iChan, :])
+        eeg_ei_control_cloze_FE_corrected = calc_results(control_baseline_FE, control["control_cloze_powers_FE"][iPart, iChan, :])
+        eeg_ei_control_cloze_VB_corrected = calc_results(control_baseline_VB, control["control_cloze_powers_VB"][iPart, iChan, :])
+        eeg_ei_control_total_FE_corrected = calc_results(control_baseline_FE, control["control_total_powers_FE"][iPart, iChan, :])
+        eeg_ei_control_total_VB_corrected = calc_results(control_baseline_VB, control["control_total_powers_VB"][iPart, iChan, :])
+        chan_result_control_yesno_FE.append(eeg_ei_control_yesno_FE_corrected)
+        chan_result_control_yesno_VB.append(eeg_ei_control_yesno_VB_corrected)
+        chan_result_control_open_FE.append(eeg_ei_control_open_FE_corrected)
+        chan_result_control_open_VB.append(eeg_ei_control_open_VB_corrected)
+        chan_result_control_cloze_FE.append(eeg_ei_control_cloze_FE_corrected)
+        chan_result_control_cloze_VB.append(eeg_ei_control_cloze_VB_corrected)
+        chan_result_control_total_FE.append(eeg_ei_control_total_FE_corrected)
+        chan_result_control_total_VB.append(eeg_ei_control_total_VB_corrected)
+
+    for iPart in range(int(NPART/2)):
+        if np.isnan(treatment["treatment_baseline_powers_FE"][iPart, iChan, 0]):
+            print("Treatment all zero")
+            continue
+
         treatment_baseline_FE = treatment["treatment_baseline_powers_FE"][iPart, iChan, :]
         treatment_baseline_VB = treatment["treatment_baseline_powers_VB"][iPart, iChan, :]
 
-        eeg_ei_control_yesno_FE_corrected = calc_results(control_baseline_FE, control["control_yesno_powers_FE"][iPart, iChan, :])
-        eeg_ei_control_yesno_VB_corrected = calc_results(control_baseline_VB, control["control_yesno_powers_VB"][iPart, iChan, :])
         eeg_ei_treatment_yesno_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_yesno_powers_FE"][iPart, iChan, :])
         eeg_ei_treatment_yesno_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_yesno_powers_VB"][iPart, iChan, :])
 
-        eeg_ei_control_open_FE_corrected = calc_results(control_baseline_FE, control["control_open_powers_FE"][iPart, iChan, :])
-        eeg_ei_control_open_VB_corrected = calc_results(control_baseline_VB, control["control_open_powers_VB"][iPart, iChan, :])
         eeg_ei_treatment_open_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_open_powers_FE"][iPart, iChan, :])
         eeg_ei_treatment_open_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_open_powers_VB"][iPart, iChan, :])
 
-        eeg_ei_control_cloze_FE_corrected = calc_results(control_baseline_FE, control["control_cloze_powers_FE"][iPart, iChan, :])
-        eeg_ei_control_cloze_VB_corrected = calc_results(control_baseline_VB, control["control_cloze_powers_VB"][iPart, iChan, :])
         eeg_ei_treatment_cloze_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_cloze_powers_FE"][iPart, iChan, :])
         eeg_ei_treatment_cloze_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_cloze_powers_VB"][iPart, iChan, :])
 
-        eeg_ei_control_total_FE_corrected = calc_results(control_baseline_FE, control["control_total_powers_FE"][iPart, iChan, :])
-        eeg_ei_control_total_VB_corrected = calc_results(control_baseline_VB, control["control_total_powers_VB"][iPart, iChan, :])
         eeg_ei_treatment_total_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_total_powers_FE"][iPart, iChan, :])
         eeg_ei_treatment_total_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_total_powers_VB"][iPart, iChan, :])
 
-        chan_result_control_yesno_FE.append(eeg_ei_control_yesno_FE_corrected)
-        chan_result_control_yesno_VB.append(eeg_ei_control_yesno_VB_corrected)
         chan_result_treatment_yesno_FE.append(eeg_ei_treatment_yesno_FE_corrected)
         chan_result_treatment_yesno_VB.append(eeg_ei_treatment_yesno_VB_corrected)
 
-        chan_result_control_open_FE.append(eeg_ei_control_open_FE_corrected)
-        chan_result_control_open_VB.append(eeg_ei_control_open_VB_corrected)
         chan_result_treatment_open_FE.append(eeg_ei_treatment_open_FE_corrected)
         chan_result_treatment_open_VB.append(eeg_ei_treatment_open_VB_corrected)
 
-        chan_result_control_cloze_FE.append(eeg_ei_control_cloze_FE_corrected)
-        chan_result_control_cloze_VB.append(eeg_ei_control_cloze_VB_corrected)
         chan_result_treatment_cloze_FE.append(eeg_ei_treatment_cloze_FE_corrected)
         chan_result_treatment_cloze_VB.append(eeg_ei_treatment_cloze_VB_corrected)
 
-        chan_result_control_total_FE.append(eeg_ei_control_total_FE_corrected)
-        chan_result_control_total_VB.append(eeg_ei_control_total_VB_corrected)
         chan_result_treatment_total_FE.append(eeg_ei_treatment_total_FE_corrected)
         chan_result_treatment_total_VB.append(eeg_ei_treatment_total_VB_corrected)
 
     figure_yesno = generate_boxplot(chan_result_control_yesno_FE, chan_result_treatment_yesno_FE, chan_result_control_yesno_VB, chan_result_treatment_yesno_VB, iChan, yesno_dir)
-    anova_yesno = run_anova(chan_result_control_yesno_FE, chan_result_treatment_yesno_FE, chan_result_control_yesno_VB, chan_result_treatment_yesno_VB, iChan, yesno_dir)
+    anova_yesno = run_test(chan_result_control_yesno_FE, chan_result_treatment_yesno_FE, chan_result_control_yesno_VB, chan_result_treatment_yesno_VB, iChan, yesno_dir)
 
     figure_open = generate_boxplot(chan_result_control_open_FE, chan_result_treatment_open_FE, chan_result_control_open_VB, chan_result_treatment_open_VB, iChan, open_dir)
-    anova_open = run_anova(chan_result_control_open_FE, chan_result_treatment_open_FE, chan_result_control_open_VB, chan_result_treatment_open_VB, iChan, open_dir)
+    anova_open = run_test(chan_result_control_open_FE, chan_result_treatment_open_FE, chan_result_control_open_VB, chan_result_treatment_open_VB, iChan, open_dir)
 
     figure_cloze = generate_boxplot(chan_result_control_cloze_FE, chan_result_treatment_cloze_FE, chan_result_control_cloze_VB, chan_result_treatment_cloze_VB, iChan, cloze_dir)
-    anova_cloze = run_anova(chan_result_control_cloze_FE, chan_result_treatment_cloze_FE, chan_result_control_cloze_VB, chan_result_treatment_cloze_VB, iChan, cloze_dir)
+    anova_cloze = run_test(chan_result_control_cloze_FE, chan_result_treatment_cloze_FE, chan_result_control_cloze_VB, chan_result_treatment_cloze_VB, iChan, cloze_dir)
 
     figure_total = generate_boxplot(chan_result_control_total_FE, chan_result_treatment_total_FE, chan_result_control_total_VB, chan_result_treatment_total_VB, iChan, total_dir)
-    anova_total = run_anova(chan_result_control_total_FE, chan_result_treatment_total_FE, chan_result_control_total_VB, chan_result_treatment_total_VB, iChan, total_dir)
+    anova_total = run_test(chan_result_control_total_FE, chan_result_treatment_total_FE, chan_result_control_total_VB, chan_result_treatment_total_VB, iChan, total_dir)
