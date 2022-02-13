@@ -37,9 +37,10 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         filename = fullfile(data_dir, files(i).name);
         data = load(filename);
         EEG = data.EEG;
-        time = EEG.timev;
-        keys = EEG.keyv;
+        timevec = EEG.timevec;
+        urkeys = EEG.urkeys;
         EEG_data = EEG.data;
+        events = EEG.event;
         srate = EEG.srate;
         nChans = EEG.nbchan;
 
@@ -52,11 +53,11 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         ch32rej = [18 29 30 31 32 33];
 
         if ismember(subj, ch1rej)
-            EEG_data = [zeros(size(EEG_data(1,:))), EEG_data(2:16,:)];
+            EEG_data = vertcat(zeros(size(EEG_data(1,:))), EEG_data(1:15,:));
         elseif ismember(subj, ch26rej)
-            EEG_data = [EEG_data(1:13,:), zeros(size(EEG_data(1,:))), EEG_data(14:16,:)];
+            EEG_data = vertcat(EEG_data(1:12,:), zeros(size(EEG_data(1,:))), EEG_data(13:15,:));
         elseif ismember(subj, ch32rej)
-            EEG_data = [EEG_data(1:15,:), zeros(size(EEG_data(1,:)))];
+            EEG_data = vertcat(EEG_data(1:15,:), zeros(size(EEG_data(1,:))));
         end
 
         curr_subj = subj;
@@ -65,85 +66,90 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         end
 
         if cond == "baseline"
-            for chan = 1:nChans
+            for chan = 1:16
                 all_zero = all(EEG_data(chan,:) == 0);
                 if all_zero
                     if mod == "FE"
-                        baseline_powers_FE(part,chan,1:3) = 0;
+                        baseline_powers_FE(part,chan,1:3) = NaN;
                         continue;
                     elseif mod == "VB"
-                        baseline_powers_VB(part,chan,1:3) = 0;
+                        baseline_powers_VB(part,chan,1:3) = NaN;
                     end
                 end
-                [thetaPower, alphaPower, betaPower] = calculate_powers(EEG_data, chan, srate);
-                if mod == "FE" && ~all_zero
-                    baseline_powers_FE(part, chan, 1) = thetaPower;
-                    baseline_powers_FE(part, chan, 2) = alphaPower;
-                    baseline_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB" && ~all_zero
-                    baseline_powers_VB(part, chan, 1) = thetaPower;
-                    baseline_powers_VB(part, chan, 2) = alphaPower;
-                    baseline_powers_VB(part, chan, 3) = betaPower;
+                if ~all_zero
+                    [thetaPower, alphaPower, betaPower] = calculate_powers(EEG_data, chan, srate);
+                    if mod == "FE"
+                        baseline_powers_FE(part, chan, 1) = thetaPower;
+                        baseline_powers_FE(part, chan, 2) = alphaPower;
+                        baseline_powers_FE(part, chan, 3) = betaPower;
+                    elseif mod == "VB"
+                        baseline_powers_VB(part, chan, 1) = thetaPower;
+                        baseline_powers_VB(part, chan, 2) = alphaPower;
+                        baseline_powers_VB(part, chan, 3) = betaPower;
+                    end
                 end
             end
         elseif cond == "model"
-            [yesno, open, cloze, total] = extract_model_tasks(EEG_data, keys);
-            for chan = 1:nChans
+            [yesno, open, cloze, total] = extract_model_tasks(EEG_data, events, subj);
+            for chan = 1:16
+                all_zero = all(EEG_data(chan,:) == 0);
                 if all_zero
                     if mod == "FE"
-                        yesno_powers_FE(part,chan,1:3) = 0;
-                        open_powers_FE(part,chan,1:3) = 0;
-                        cloze_powers_FE(part,chan,1:3) = 0;
-                        total_powers_FE(part,chan,1:3) = 0;
+                        yesno_powers_FE(part,chan,1:3) = NaN;
+                        open_powers_FE(part,chan,1:3) = NaN;
+                        cloze_powers_FE(part,chan,1:3) = NaN;
+                        total_powers_FE(part,chan,1:3) = NaN;
                     elseif mod == "VB"
-                        yesno_powers_VB(part,chan,1:3) = 0;
-                        open_powers_VB(part,chan,1:3) = 0;
-                        cloze_powers_VB(part,chan,1:3) = 0;
-                        total_powers_VB(part,chan,1:3) = 0;
+                        yesno_powers_VB(part,chan,1:3) = NaN;
+                        open_powers_VB(part,chan,1:3) = NaN;
+                        cloze_powers_VB(part,chan,1:3) = NaN;
+                        total_powers_VB(part,chan,1:3) = NaN;
                     end
                 end
-                [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
-                if mod == "FE" && ~all_zero
-                    yesno_powers_FE(part, chan, 1) = thetaPower;
-                    yesno_powers_FE(part, chan, 2) = alphaPower;
-                    yesno_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB" && ~all_zero
-                    yesno_powers_VB(part, chan, 1) = thetaPower;
-                    yesno_powers_VB(part, chan, 2) = alphaPower;
-                    yesno_powers_VB(part, chan, 3) = betaPower;
-                end
-
-                [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
-                if mod == "FE" && ~all_zero
-                    open_powers_FE(part, chan, 1) = thetaPower;
-                    open_powers_FE(part, chan, 2) = alphaPower;
-                    open_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB" && ~all_zero
-                    open_powers_VB(part, chan, 1) = thetaPower;
-                    open_powers_VB(part, chan, 2) = alphaPower;
-                    open_powers_VB(part, chan, 3) = betaPower;
-                end
-
-                [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
-                if mod == "FE" && ~all_zero
-                    cloze_powers_FE(part, chan, 1) = thetaPower;
-                    cloze_powers_FE(part, chan, 2) = alphaPower;
-                    cloze_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB" && ~all_zero
-                    cloze_powers_VB(part, chan, 1) = thetaPower;
-                    cloze_powers_VB(part, chan, 2) = alphaPower;
-                    cloze_powers_VB(part, chan, 3) = betaPower;
-                end
-
-                [thetaPower, alphaPower, betaPower] = calculate_powers(total, chan, srate);
-                if mod == "FE" && ~all_zero
-                    total_powers_FE(part, chan, 1) = thetaPower;
-                    total_powers_FE(part, chan, 2) = alphaPower;
-                    total_powers_FE(part, chan, 3) = betaPower;
-                elseif mod == "VB" && ~all_zero
-                    total_powers_VB(part, chan, 1) = thetaPower;
-                    total_powers_VB(part, chan, 2) = alphaPower;
-                    total_powers_VB(part, chan, 3) = betaPower;
+                if ~all_zero
+                    [thetaPower, alphaPower, betaPower] = calculate_powers(yesno, chan, srate);
+                    if mod == "FE"
+                        yesno_powers_FE(part, chan, 1) = thetaPower;
+                        yesno_powers_FE(part, chan, 2) = alphaPower;
+                        yesno_powers_FE(part, chan, 3) = betaPower;
+                    elseif mod == "VB"
+                        yesno_powers_VB(part, chan, 1) = thetaPower;
+                        yesno_powers_VB(part, chan, 2) = alphaPower;
+                        yesno_powers_VB(part, chan, 3) = betaPower;
+                    end
+    
+                    [thetaPower, alphaPower, betaPower] = calculate_powers(open, chan, srate);
+                    if mod == "FE"
+                        open_powers_FE(part, chan, 1) = thetaPower;
+                        open_powers_FE(part, chan, 2) = alphaPower;
+                        open_powers_FE(part, chan, 3) = betaPower;
+                    elseif mod == "VB"
+                        open_powers_VB(part, chan, 1) = thetaPower;
+                        open_powers_VB(part, chan, 2) = alphaPower;
+                        open_powers_VB(part, chan, 3) = betaPower;
+                    end
+    
+                    [thetaPower, alphaPower, betaPower] = calculate_powers(cloze, chan, srate);
+                    if mod == "FE"
+                        cloze_powers_FE(part, chan, 1) = thetaPower;
+                        cloze_powers_FE(part, chan, 2) = alphaPower;
+                        cloze_powers_FE(part, chan, 3) = betaPower;
+                    elseif mod == "VB"
+                        cloze_powers_VB(part, chan, 1) = thetaPower;
+                        cloze_powers_VB(part, chan, 2) = alphaPower;
+                        cloze_powers_VB(part, chan, 3) = betaPower;
+                    end
+    
+                    [thetaPower, alphaPower, betaPower] = calculate_powers(total, chan, srate);
+                    if mod == "FE"
+                        total_powers_FE(part, chan, 1) = thetaPower;
+                        total_powers_FE(part, chan, 2) = alphaPower;
+                        total_powers_FE(part, chan, 3) = betaPower;
+                    elseif mod == "VB"
+                        total_powers_VB(part, chan, 1) = thetaPower;
+                        total_powers_VB(part, chan, 2) = alphaPower;
+                        total_powers_VB(part, chan, 3) = betaPower;
+                    end
                 end
             end
         end
@@ -172,53 +178,39 @@ function [subj, cond, mod] = process_filename(filename)
 end
 
 function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
-    disp(size(data,2));
-    [spectra, freqs] = spectopo(data(chan,:,:), 0, Fs, 'winsize', Fs, 'nfft', Fs, 'plot', 'off');
+    [spectra, freqs] = spectopo(data(chan,:), 0, Fs, 'winsize', Fs, 'nfft', Fs, 'plot', 'off');
 
     thetaIdx = find(freqs>4 & freqs<8);
     alphaIdx = find(freqs>8 & freqs<13);
     betaIdx  = find(freqs>13 & freqs<30);
 
-    thetaPower = mean(10.^(spectra(thetaIdx)/10));
-    alphaPower = mean(10.^(spectra(alphaIdx)/10));
-    betaPower  = mean(10.^(spectra(betaIdx)/10));
+    thetaPower = 10^(mean(spectra(thetaIdx)/10));
+    alphaPower = 10^(mean(spectra(alphaIdx)/10));
+    betaPower  = 10^(mean(spectra(betaIdx)/10));
 end
 
-function [yesno, open, cloze, total] = extract_model_tasks(data, keys)
-    end_task_seq = [66 69];
-    new_task_seq = [69 66];
-    end_task_i = strfind(keys, end_task_seq);
-    new_task_i = strfind(keys, new_task_seq);
+function [yesno, open, cloze, total] = extract_model_tasks(data, events, subj)
+    begins = [];
+    ends = [];
 
-    if length(end_task_i) ~= 5
-        if length(new_task_i) == 4
-            question_tasks = data(:,new_task_i(2):end);
-            question_keys = keys(:,new_task_i(2):end);
-            total = question_tasks(:,question_keys(1,:) == 66);
-
-            yesno = data(:,new_task_i(2):end_task_i(3));
-            open = data(:,new_task_i(3):end_task_i(4));
-            cloze = data(:,new_task_i(4):end);
-        elseif length(new_task_i) == 5 && new_task_i(end) == 425574
-            question_tasks = data(:,new_task_i(2):end_task_i(5));
-            question_keys = keys(:,new_task_i(2):end_task_i(5));
-            total = question_tasks(:,question_keys(1,:) == 66);
-
-            yesno = data(:,new_task_i(2):end_task_i(3));
-            open = data(:,new_task_i(3):end_task_i(4));
-            cloze = data(:,new_task_i(4):end_task_i(5));
-        else
-            error("Amount of new task beginnings not equal to 4");
+    for i = 1:length(events)
+        if events(i).type == "begin"
+            begins = [begins events(i).latency];
+        elseif events(i).type == "end"
+            ends = [ends events(i).latency];
         end
-    elseif length(end_task_i) == 5
-        question_tasks = data(:,new_task_i(2):end_task_i(5));
-        question_keys = keys(:,new_task_i(2):end_task_i(5));
-        total = question_tasks(:,question_keys(1,:) == 66);
+    end
+    
+    disp(subj);
 
-        yesno = data(:,new_task_i(2):end_task_i(3));
-        open = data(:,new_task_i(3):end_task_i(4));
-        cloze = data(:,new_task_i(4):end_task_i(5));
+    if length(begins) ~= 5 && subj ~= 10
+        error("5 beginnings expected");
+    elseif length(ends) ~= 5 && length(ends) ~= 6 && subj ~= 10
+        error("5 or 6 endings expected");
     else
-        error("Amount of task endings not equal to 4 or 5");
+        yesno = data(:,begins(3):ends(3));
+        open = data(:,begins(4):ends(4));
+        cloze = data(:,begins(5):ends(5));
+        total = data(:,[begins(3):ends(3), begins(4):ends(4), begins(5),ends(5)]);
     end
 end
