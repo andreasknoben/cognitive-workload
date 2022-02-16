@@ -70,7 +70,7 @@ function processed = process_dir(data_dir, processed_dir)
         nchan = 16;
         ch1rej = [21 22 23];
         ch26rej = [48 49 50 51];
-        ch32rej = [18 29 30 31 32 33];
+        ch32rej = [8 18 29 30 31 32 33];
         if ismember(subj, ch1rej)
             EEG = pop_select(EEG, 'nochannel', 1);
             nchan = nchan - 1;
@@ -126,6 +126,14 @@ function processed = process_dir(data_dir, processed_dir)
 
         [ALLEEG EEG CURRENTSET] = pop_newset(ALLEEG, EEG, CURRENTSET, 'setname', 'evdata-filtered-rejected');
 
+        % Prepare EEG struct for intermediate storage
+        proc_filename = strcat(processed_dir, "/rej/", filename);
+        EEG.timevec = time;
+        EEG.urkeys = keys;
+
+        % Store temporally rejected EEG data
+        save(proc_filename, 'EEG'); 
+
         % Run ICA
         EEG = pop_runica(EEG, 'icatype', 'runica', 'extended', 1);
         pop_eegplot(EEG, 0, 'winlength', 10);
@@ -140,28 +148,7 @@ function processed = process_dir(data_dir, processed_dir)
         EEG.urkeys = keys;
 
         % Store processed EEG data
-        save(proc_filename, 'EEG');
-        
+        save(proc_filename, 'EEG');    
     end
     processed = 1;
-end
-
-function [subj, cond, mod] = process_filename(filename)
-    fn_string = string(filename);
-    fn_char = char(filename);
-
-    subj_str = extractBetween(fn_string, 5, 7);
-    subj = str2num(subj_str);
-
-    if fn_char(9) == "b"
-        cond = "baseline";
-    elseif fn_char(9) == "m"
-        cond = "model";
-    end
-
-    if endsWith(fn_string, "FE.mat")
-        mod = "FE";
-    elseif endsWith(fn_string, "VB.mat")
-        mod = "VB";
-    end
 end
