@@ -60,15 +60,84 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
 
         % Reject known bad channels
         ch1rej = [21 22 23];
-        ch26rej = [48 49 50 51];
-        ch32rej = [8 18 29 30 31 32 33];
+        ch2rej = [52];
+        % ch15rej = [52];
+        ch18rej = [51 55];
+        ch26rej = [46 47 48 49 50 51];
+        ch28rej = [31];
+        % ch32rejextra = [23 31]
+        ch32rej = [8 11 16 18 28 29 30 32 33];
 
         if ismember(subj, ch1rej)
-            EEG_data = vertcat(zeros(size(EEG_data(1,:))), EEG_data(1:15,:));
+            ptc23proc = false;
+            if size(EEG_data, 1) == 16
+                EEG_data = vertcat(zeros(size(EEG_data(1,:))), EEG_data(2:16,:));
+            elseif size(EEG_data, 1) == 15
+                EEG_data = vertcat(zeros(size(EEG_data(1,:))), EEG_data(1:15,:));
+            elseif size(EEG_data, 1) == 14
+                EEG_data = vertcat(zeros(size(EEG_data(1,:))), EEG_data(1:14,:), zeros(size(EEG_data(1,:))));
+                ptc23proc = true;
+            else
+                error(strcat("[ERROR] Something is wrong with the size of the EEG data for", filename));
+            end
+            if subj == 23 && ptc23proc == false
+                EEG_data = vertcat(EEG_data(1:15,:), zeros(size(EEG_data(1,:))));
+                ptc23proc = true;
+            end
+        elseif ismember(subj, ch2rej)
+            ptc52proc = false;
+            if size(EEG_data, 1) == 16
+                EEG_data = vertcat(EEG_data(1,:), zeros(size(EEG_data(1,:))), EEG_data(3:16,:));
+            elseif size(EEG_data, 1) == 15
+                EEG_data = vertcat(EEG_data(1,:), zeros(size(EEG_data(1,:))), EEG_data(2:15,:));
+            elseif size(EEG_data, 1) == 14
+                EEG_data = vertcat(EEG_data(1,:), zeros(size(EEG_data(1,:))), EEG_data(2:5,:), zeros(size(EEG_data(1,:))), EEG_data(6:14,:));
+                ptc52proc = true;
+            else
+                error(strcat("[ERROR] Something is wrong with the size of the EEG data for", filename));
+            end
+            if subj == 52 && ptc52proc == false
+                EEG_data = vertcat(EEG_data(1:6,:), zeros(size(EEG_data(1,:))), EEG_data(8:16,:));
+            end
+        elseif ismember(subj, ch18rej)
+            if size(EEG_data, 1) == 16
+                EEG_data = vertcat(EEG_data(1:9,:), zeros(size(EEG_data(1,:))), EEG_data(11:16,:));
+            elseif size(EEG_data, 1) == 15
+                EEG_data = vertcat(EEG_data(1:9,:), zeros(size(EEG_data(1,:))), EEG_data(10:15,:));
+            else
+                error(strcat("[ERROR] Something is wrong with the size of the EEG data for", filename));
+            end
         elseif ismember(subj, ch26rej)
-            EEG_data = vertcat(EEG_data(1:12,:), zeros(size(EEG_data(1,:))), EEG_data(13:15,:));
+            if size(EEG_data, 1) == 16
+                EEG_data = vertcat(EEG_data(1:12,:), zeros(size(EEG_data(1,:))), EEG_data(14:16,:));
+            elseif size(EEG_data, 1) == 15
+                EEG_data = vertcat(EEG_data(1:12,:), zeros(size(EEG_data(1,:))), EEG_data(13:15,:));
+            else
+                error(strcat("[ERROR] Something is wrong with the size of the EEG data for", filename));
+            end
+        elseif ismember(subj, ch28rej)
+            ptc31proc = false;
+            if size(EEG_data, 1) == 16
+                EEG_data = vertcat(EEG_data(1:13,:), zeros(size(EEG_data(1,:))), EEG_data(15:16,:));
+            elseif size(EEG_data, 1) == 15
+                EEG_data = vertcat(EEG_data(1:13,:), zeros(size(EEG_data(1,:))), EEG_data(14:15,:));
+            elseif size(EEG_data, 1) == 14
+                EEG_data = vertcat(EEG_data(1:13,:), zeros(size(EEG_data(1,:))), EEG_data(14,:), zeros(size(EEG_data(1,:))));
+                ptc31proc = true;
+            else
+                error(strcat("[ERROR] Something is wrong with the size of the EEG data for", filename));
+            end
+            if subj == 31 && ptc31proc == false
+                EEG_data = vertcat(EEG_data(1:15,:), zeros(size(EEG_data(1,:))));
+                ptc31proc = true;
+            end
         elseif ismember(subj, ch32rej)
             EEG_data = vertcat(EEG_data(1:15,:), zeros(size(EEG_data(1,:))));
+        end
+
+        % Check whether the processed data contains 16 channels
+        if size(EEG_data, 1) ~= 16
+            error("[ERROR] Channel-rejection-processed EEG data does not contain 16 channels");
         end
 
         % Update participant counter if needed
