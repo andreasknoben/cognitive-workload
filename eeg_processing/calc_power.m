@@ -178,15 +178,25 @@ function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
     %   chan    - The channel over which the powers are to be calculated
     %   Fs      - The sampling rate
 
-    [spectra, freqs] = spectopo(data(chan,:), 0, Fs, 'winsize', Fs, 'nfft', Fs, 'plot', 'off');
+    [spectra, freqs] = spectopo(data(chan,:), 0, Fs, 'plot', 'off');
 
+    % Frequencies: theta 4-8 Hz; alpha 8-13 Hz; beta 13-30 Hz
     thetaIdx = find(freqs>4 & freqs<8);
     alphaIdx = find(freqs>8 & freqs<13);
     betaIdx  = find(freqs>13 & freqs<30);
 
-    thetaPower = 10^(mean(spectra(thetaIdx)/10));
-    alphaPower = 10^(mean(spectra(alphaIdx)/10));
-    betaPower  = 10^(mean(spectra(betaIdx)/10));
+    thetaPower = 10^(mean(spectra(thetaIdx))/10);
+    alphaPower = 10^(mean(spectra(alphaIdx))/10);
+    betaPower  = 10^(mean(spectra(betaIdx))/10);
+
+    if thetaPower < 0
+        error("Theta power less than 0")
+    elseif alphaPower < 0
+        error("Alpha power less than 0")
+    elseif betaPower < 0
+        error("Beta power less than 0")
+    end
+
 end
 
 function [yesno, open, cloze, total] = extract_model_tasks(data, events, subj)
@@ -210,10 +220,15 @@ function [yesno, open, cloze, total] = extract_model_tasks(data, events, subj)
     end
     
     % Construct task EEG data
-    if length(begins) ~= 5 && subj ~= 10
+    if length(begins) ~= 5 && (subj ~= 10 && subj ~= 55)
         error("5 beginnings expected");
-    elseif length(ends) ~= 5 && length(ends) ~= 6 && subj ~= 10
+    elseif length(ends) ~= 5 && length(ends) ~= 6 && (subj ~= 10 && subj ~= 55)
         error("5 or 6 endings expected");
+    elseif length(begins) == 4 && subj == 55
+        yesno = data(:,begins(2):ends(2));
+        open = data(:,begins(3):ends(3));
+        cloze = data(:,begins(4):ends(4));
+        total = data(:,[begins(2):ends(2), begins(3):ends(3), begins(4):ends(4)]);
     else
         yesno = data(:,begins(3):ends(3));
         open = data(:,begins(4):ends(4));
