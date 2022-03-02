@@ -69,14 +69,41 @@ function processed = process_dir(data_dir, processed_dir)
         % Remove specific channnels
         nchan = 16;
         ch1rej = [21 22 23];
-        ch26rej = [48 49 50 51];
-        ch32rej = [8 18 29 30 31 32 33];
+        ch2rej = [52];
+        % ch15rej = [52];
+        ch18rej = [51 55];
+        ch26rej = [46 47 48 49 50 51];
+        ch28rej = [31];
+        % ch32rejextra = [23 31]
+        ch32rej = [8 11 16 18 28 29 30 32 33];
+
         if ismember(subj, ch1rej)
             EEG = pop_select(EEG, 'nochannel', 1);
+            nchan = nchan - 1;
+            if subj == 23
+                EEG = pop_select(EEG, 'nochannel', 15);
+                nchan = nchan - 1;
+            end
+        elseif ismember(subj, ch2rej)
+            EEG = pop_select(EEG, 'nochannel', 2);
+            nchan = nchan - 1;
+            if subj == 52
+               EEG = pop_select(EEG, 'nochannel', 6);
+               nchan = nchan - 1;
+            end
+        elseif ismember(subj, ch18rej)
+            EEG = pop_select(EEG, 'nochannel', 10);
             nchan = nchan - 1;
         elseif ismember(subj, ch26rej)
             EEG = pop_select(EEG, 'nochannel', 13);
             nchan = nchan - 1;
+        elseif ismember(subj, ch28rej)
+            EEG = pop_select(EEG, 'nochannel', 14);
+            nchan = nchan - 1;
+            if subj == 31
+                EEG = pop_select(EEG, 'nochannel', 15);
+                nchan = nchan - 1;
+            end
         elseif ismember(subj, ch32rej)
             EEG = pop_select(EEG, 'nochannel', 16);
             nchan = nchan - 1;
