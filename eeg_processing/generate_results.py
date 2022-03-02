@@ -20,7 +20,15 @@ def calc_eeg_engagementindex(powers):
     '''
 
     theta, alpha, beta = powers[0], powers[1], powers[2]
+    if theta < 0:
+        ValueError("theta less than 0")
+    elif alpha < 0:
+        ValueError("alpha less than 0")
+    elif beta < 0:
+        ValueError("beta less than 0")
     index = beta / (theta + alpha)
+    if index < 0:
+        ValueError("index less than 0")
     return index
 
 def calc_results(baseline, task):
