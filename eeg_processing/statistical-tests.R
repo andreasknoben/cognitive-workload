@@ -52,26 +52,12 @@ statistical_test <- function(control, treatment, norm_viol, output) {
 }
 
 plot_data <- function(control, treatment, output) {
-  layout <- "
-  ######OO####PP######
-  ######OO####PP######
-  #####LL##MM##NN#####
-  #####LL##MM##NN#####
-  #AA##BB##CC##DD##EE#
-  #AA##BB##CC##DD##EE#
-  #####FF##GG##HH#####
-  #####FF##GG##HH#####
-  ####II###JJ###KK####
-  ####II###JJ###KK####
-  "
-  
-  plots <- vector('list', NCHANS)
-  
+  # Create svg plot for each channel
   for (iChan in 1:NCHANS) {
-    i <- iChan
     concat_data <- c(control[iChan], treatment[iChan])
     plot_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS/2),
                             indices = unlist(concat_data))
+    
     plot <- ggplot(data = plot_data) +
       geom_boxplot(aes(x = condition, y = indices),
                    fill = c("#56B4E9", "#009E73")) +
@@ -82,6 +68,7 @@ plot_data <- function(control, treatment, output) {
             axis.ticks.x = element_blank(),
             axis.text.y = element_text(size = 20),
             plot.title = element_text(size = 28, hjust = 0.5))
+    
     svg(paste(output, "chan", CHANS[iChan], ".svg", sep=""), width = 3.25, height = 3.75)
     print(plot)
     dev.off()
