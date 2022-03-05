@@ -239,7 +239,7 @@ def compute_eeis(yesno, openq, cloze, total):
         total = update_dataframes(total, chan_result_control_total_FE, chan_result_treatment_total_FE,
                                       chan_result_control_total_VB, chan_result_treatment_total_VB, iChan)
 
-    return [yesno, open, cloze, total]
+    return [yesno, openq, cloze, total]
 
 
 control = scipy.io.loadmat('powers/control.mat')
