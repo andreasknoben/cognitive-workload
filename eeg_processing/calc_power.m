@@ -1,4 +1,5 @@
 % Calculate spectral powers from pre-processed data
+
 % Create folder variables
 dir_data_control = 'processed-data/control';
 dir_data_treatment = 'processed-data/treatment';
@@ -55,7 +56,7 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
         events = EEG.event;
         srate = EEG.srate;
 
-        disp(strcat("Processing ", filename))
+        disp(strcat("[INFO] Processing ", filename))
         [subj, cond, mod] = process_filename(files(i).name);
 
         % Reject known bad channels
@@ -98,6 +99,7 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
             end
             if subj == 52 && ptc52proc == false
                 EEG_data = vertcat(EEG_data(1:6,:), zeros(size(EEG_data(1,:))), EEG_data(8:16,:));
+                ptc52proc = true;
             end
         elseif ismember(subj, ch18rej)
             if size(EEG_data, 1) == 16
@@ -155,7 +157,6 @@ function [baseline_powers_FE, total_powers_FE, yesno_powers_FE, open_powers_FE, 
                 if all_zero
                     if mod == "FE"
                         baseline_powers_FE(part,chan,1:3) = NaN;
-                        continue;
                     elseif mod == "VB"
                         baseline_powers_VB(part,chan,1:3) = NaN;
                     end
@@ -258,19 +259,21 @@ function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
     alphaPower = 10^(mean(spectra(alphaIdx))/10);
     betaPower  = 10^(mean(spectra(betaIdx))/10);
 
+    % Check: are the powers non-zero?
     if thetaPower < 0
-        error("Theta power less than 0")
-    elseif alphaPower < 0
-        error("Alpha power less than 0")
-    elseif betaPower < 0
-        error("Beta power less than 0")
+        error("[ERROR] Theta power less than 0")
     end
-
+    if alphaPower < 0
+        error("[ERROR] Alpha power less than 0")
+    end
+    if betaPower < 0
+        error("[ERROR] Beta power less than 0")
+    end
 end
 
 function [yesno, open, cloze, total] = extract_model_tasks(data, events, subj)
     % extract_model_tasks() - Extracts the subtasks from the data using
-    % EEGLAB events
+    %                         EEGLAB events
     % Required inputs:
     %   data    - The EEG data
     %   events  - The EEGLAB events
@@ -290,9 +293,9 @@ function [yesno, open, cloze, total] = extract_model_tasks(data, events, subj)
     
     % Construct task EEG data
     if length(begins) ~= 5 && (subj ~= 10 && subj ~= 55)
-        error("5 beginnings expected");
+        error(strcat("[ERROR] 5 beginnings expected, got ", num2str(length(begins))));
     elseif length(ends) ~= 5 && length(ends) ~= 6 && (subj ~= 10 && subj ~= 55)
-        error("5 or 6 endings expected");
+        error(strcat("[ERROR] 5 or 6 endings expected, got ", num2str(length(ends))));
     elseif length(begins) == 4 && subj == 55
         yesno = data(:,begins(2):ends(2));
         open = data(:,begins(3):ends(3));
