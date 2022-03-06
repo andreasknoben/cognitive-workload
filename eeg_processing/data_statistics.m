@@ -1,92 +1,127 @@
+% Generate some basic data statistics from the raw EEG data
+
+% Set folder variables
 dir_control = "data/control";
 dir_treatment = "data/treatment";
 
-statistics = generate_statistics(dir_control);
-writematrix(statistics, 'results/data_statistics.csv');
+% Create statistics and write to file
+[control_statistics_FE, control_statistics_VB] = generate_statistics(dir_control);
+write_to_file(control_statistics_FE, 'results/data_stats_control_FE.csv');
+write_to_file(control_statistics_VB, 'results/data_stats_control_VB.csv');
 
-function statistics = generate_statistics(data_dir)
+[treatment_statistics_FE, treatment_statistics_VB] = generate_statistics(dir_treatment);
+write_to_file(treatment_statistics_FE, 'results/data_stats_treatment_FE.csv');
+write_to_file(treatment_statistics_VB, 'results/data_stats_treatment_VB.csv');
+
+function [statistics_FE, statistics_VB] = generate_statistics(data_dir)
+    % generate_statistics() - Generate some basic data statistics
+    %
+    % Required inputs:
+    %   data_dir    - Directory containing the raw EEG files
+
+    % Generate file list, prepare matrices
     files = dir(data_dir + "/*.mat");
-    statistics = zeros(length(files)/2,4);
+    statistics_FE = zeros(length(files)/4, 5);
+    statistics_VB = zeros(length(files)/4, 5);
+    Fs = 250;
 
-    j = 0;
+    % Loop over all files
+    cFE = 0;
+    cVB = 0;
     for i = 1:length(files)
+        % Extract basic file information
         filename = fullfile(data_dir, files(i).name);
         data = load(filename).y;
-        disp(strcat("Processing ", filename))
+        disp(strcat("[INFO] Processing ", filename))
         keys = data(2,:);
         
         [subj, cond, mod] = process_filename(files(i).name);
         
+        % If the file contains model EEG, extract statistics
         if cond == "model"
-            j = j + 1;
-            [yesno open cloze total] = extract_model_tasks(keys);
-            t_yesno = length(yesno) / 250;
-            t_open = length(open) / 250;
-            t_cloze = length(cloze) / 250;
-            t_total = length(total) / 250;
+            [yesno, open, cloze, total] = extract_model_tasks(keys, subj);
 
-            statistics(j, 1) = t_yesno;
-            statistics(j, 2) = t_open;
-            statistics(j, 3) = t_cloze;
-            statistics(j, 4) = t_total;
+            % Compute druation of tasks
+            t_yesno = length(yesno) / Fs;
+            t_open = length(open) / Fs;
+            t_cloze = length(cloze) / Fs;
+            t_total_m = length(total) / Fs;
+            t_total_s = t_yesno + t_open + t_cloze;
+
+            % Write times into appropriate matrix
+            if mod == "FE"
+                cFE = cFE + 1;
+                statistics_FE(cFE, 1) = t_yesno;
+                statistics_FE(cFE, 2) = t_open;
+                statistics_FE(cFE, 3) = t_cloze;
+                statistics_FE(cFE, 4) = t_total_m;
+                statistics_FE(cFE, 5) = t_total_s;
+            elseif mod == "VB"
+                cVB = cVB + 1;
+                statistics_VB(cVB, 1) = t_yesno;
+                statistics_VB(cVB, 2) = t_open;
+                statistics_VB(cVB, 3) = t_cloze;
+                statistics_VB(cVB, 4) = t_total_m;
+                statistics_VB(cVB, 5) = t_total_s;
+            end
         end
     end
 end
 
-function [subj, cond, mod] = process_filename(filename)
-    fn_string = string(filename);
-    fn_char = char(filename);
-
-    subj_str = extractBetween(fn_string,5,7);
-    subj = str2num(subj_str);
-
-    if fn_char(9) == "b"
-        cond = "baseline";
-    elseif fn_char(9) == "m"
-        cond = "model";
-    end
-
-    if endsWith(fn_string, "FE.mat")
-        mod = "FE";
-    elseif endsWith(fn_string, "VB.mat")
-        mod = "VB";
-    end
-end
-
-function [yesno, open, cloze, total] = extract_model_tasks(keys)
+function [yesno, open, cloze, total] = extract_model_tasks(keys, subj)
+    % extract_model_tasks() - Extracts the subtasks from the data using
+    %                         the keyboard press vector
+    % Required inputs:
+    %   keys    - The keypress vector
+    %   subj    - Number of currently processed subject
+    
+    % Set up begin/end task sequences, find these beginnings/ends
     end_task_seq = [66 69];
     new_task_seq = [69 66];
     end_task_i = strfind(keys, end_task_seq);
     new_task_i = strfind(keys, new_task_seq);
 
-    if length(end_task_i) ~= 5
+    % Extract intervals where tasks are being done
+    if length(end_task_i) ~= 5 && subj ~= 10
         if length(new_task_i) == 4
-            question_tasks = data(:,new_task_i(2):end);
-            question_keys = keys(:,new_task_i(2):end);
-            total = question_tasks(:,question_keys(1,:) == 66);
-
-            yesno = data(:,new_task_i(2):end_task_i(3));
-            open = data(:,new_task_i(3):end_task_i(4));
-            cloze = data(:,new_task_i(4):end);
+            total = keys(:,new_task_i(2):end);
+            yesno = keys(:,new_task_i(2):end_task_i(3));
+            open = keys(:,new_task_i(3):end_task_i(4));
+            cloze = keys(:,new_task_i(4):end);
         elseif length(new_task_i) == 5 && new_task_i(end) == 425574
-            question_tasks = data(:,new_task_i(2):end_task_i(5));
-            question_keys = keys(:,new_task_i(2):end_task_i(5));
-            total = question_tasks(:,question_keys(1,:) == 66);
-
-            yesno = data(:,new_task_i(2):end_task_i(3));
-            open = data(:,new_task_i(3):end_task_i(4));
-            cloze = data(:,new_task_i(4):end_task_i(5));
+            total = keys(:,new_task_i(2):end_task_i(5));
+            yesno = keys(:,new_task_i(2):end_task_i(3));
+            open = keys(:,new_task_i(3):end_task_i(4));
+            cloze = keys(:,new_task_i(4):end_task_i(5));
         else
-            error("Amount of new task beginnings not equal to 4");
+            error("[ERROR] Amount of new task beginnings not equal to 4");
         end
-    elseif length(end_task_i) == 5
-        question_keys = keys(:,new_task_i(2):end_task_i(5));
-        total = question_keys(question_keys == 66);
-
+    elseif length(end_task_i) == 5 || subj == 10
+        total = keys(:,new_task_i(2):end_task_i(5));
         yesno = keys(:,new_task_i(2):end_task_i(3));
         open = keys(:,new_task_i(3):end_task_i(4));
         cloze = keys(:,new_task_i(4):end_task_i(5));
     else
         error("Amount of task endings not equal to 4 or 5");
     end
+
+    % Final filtering
+    total = total(total == 66);
+    yesno = yesno(yesno == 66);
+    open = open(open == 66);
+    cloze = cloze(cloze == 66);
+end
+
+function written = write_to_file(data, target)
+    % write_to_file()   - Writes data matrix to target file
+    %
+    % Required inputs:
+    %   data    - The data to be written
+    %   target  - The target file
+    
+    col_names = {'yesno', 'open', 'cloze', 'total_extracted', 'total_summed'};
+    tbl = array2table(data);
+    tbl.Properties.VariableNames(1:5) = col_names;
+    writetable(tbl, target);
+    written = 1;
 end
