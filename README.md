@@ -1,5 +1,5 @@
 # Cognitive Workload with Conceptual Models
-This repository contains the code for the research project "Cognitive Workload Associated with Different Conceptual Modelling Approaches". It contains the survey evaluation code (Python) and the code to calculate the EEG engagement index (MATLAB and Python). Please refer to the appropriate sections for more information about these.
+This repository contains the code for the research project "Cognitive Workload Associated with Different Conceptual Modelling Approaches". It contains the survey evaluation code (Python) and the code to calculate the EEG engagement index (MATLAB and R). Please refer to the appropriate sections for more information about these.
 
 ## EEG Processing
 The `eeg-processing` folder contains the code necessary to process the EEG data. This section reviews the functions of each file.
@@ -10,11 +10,20 @@ The `calc_power.m` file is a MATLAB script that runs through the processed EEG d
 ### chan_locs.elc
 `chan_locs.elc` contains the locations of the channels used in this experiment.
 
+### data_statistics.m
+`data_statistics.m` allows to generate basic data statistics from the raw EEG data. At the moment, it extracts the time taken to perform tasks and stores these in the `results` folder.
+
 ### generate_results.py
-The `generate_results.py` takes the `.mat` files created by `calc_power.m`, in which the powers are stored. It calculates the EEG Engagement Indices for each participant and channel and puts them in the appropriate conditions. From this data, per channel, it creates a boxplot and runs a two-way ANOVA. The results of these can be found in the `results` folder.
+The `generate_results.py` takes the `.mat` files created by `calc_power.m`, in which the powers are stored. It calculates the EEG Engagement Indices for each participant and channel and puts them in the appropriate conditions.
 
 ### preprocess.m
-The `preprocess.m` file is a MATLAB script that aims to preprocess the EEG data from the `data` folder and save it in a preprocessed format ready for use. It extracts the time and keyboard presses vectors and the actual EEG data and subsequently the 16 channels that are used. It applies a 0.5-60Hz bandpass filter (note: during extraction, the data should have already been filtered this way). It then runs ICA, plots the components and asks which to remove. After this removal, the dataset is repackaged and stored in the `processed-data` folder.
+The `preprocess.m` file is a MATLAB script that aims to preprocess the EEG data from the `data` folder and save it in a preprocessed format ready for use. It extracts the time and keyboard presses vectors, which are converted to EEGLAB events, and the actual EEG data and subsequently the 16 channels that are used. It applies a 0.5-60Hz bandpass filter (note: during extraction, the data should have already been filtered this way). Then, temporal rejection is done, after which it then runs ICA, plots the components and asks which to remove. After this removal, the dataset is repackaged and stored in the `processed-data` folder.
+
+### process_filename.m
+The `process_filename.m` file is a function that is used by multiple other scripts to extract subject, model, and condition from the filename.
+
+### statistical_tests.R
+The `statistical_tests.R` file is an R script that runs on the EEG Engagement Indices. It checks normality for each channel. If the normality assumption is violated, it runs a Mann-Whitney U test to compare the LOEM and HOEM groups. If the normality assumption is not violated, it runs a Welch independent samples t-test. The results are stored in the respective folder for the task in the `results` folder.
 
 ## Question Evaluation
 The `question-evaluation` folder contains the code that allows to check the questions automatically for as much as possible.
