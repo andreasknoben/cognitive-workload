@@ -22,9 +22,9 @@ def calc_eeg_engagementindex(powers):
     theta, alpha, beta = powers[0], powers[1], powers[2]
     if theta < 0:
         ValueError("theta less than 0")
-    elif alpha < 0:
+    if alpha < 0:
         ValueError("alpha less than 0")
-    elif beta < 0:
+    if beta < 0:
         ValueError("beta less than 0")
 
     index = beta / (theta + alpha)
@@ -145,25 +145,17 @@ def compute_eeis(yesno, openq, cloze, total):
             control_baseline_FE = control["control_baseline_powers_FE"][iPart, iChan, :]
             control_baseline_VB = control["control_baseline_powers_VB"][iPart, iChan, :]
 
-            eeg_ei_control_yesno_FE_corrected = calc_results(control_baseline_FE,
-                                                             control["control_yesno_powers_FE"][iPart, iChan, :])
-            eeg_ei_control_yesno_VB_corrected = calc_results(control_baseline_VB,
-                                                             control["control_yesno_powers_VB"][iPart, iChan, :])
+            eeg_ei_control_yesno_FE_corrected = calc_results(control_baseline_FE, control["control_yesno_powers_FE"][iPart, iChan, :])
+            eeg_ei_control_yesno_VB_corrected = calc_results(control_baseline_VB, control["control_yesno_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_control_open_FE_corrected = calc_results(control_baseline_FE,
-                                                            control["control_open_powers_FE"][iPart, iChan, :])
-            eeg_ei_control_open_VB_corrected = calc_results(control_baseline_VB,
-                                                            control["control_open_powers_VB"][iPart, iChan, :])
+            eeg_ei_control_open_FE_corrected = calc_results(control_baseline_FE, control["control_open_powers_FE"][iPart, iChan, :])
+            eeg_ei_control_open_VB_corrected = calc_results(control_baseline_VB, control["control_open_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_control_cloze_FE_corrected = calc_results(control_baseline_FE,
-                                                             control["control_cloze_powers_FE"][iPart, iChan, :])
-            eeg_ei_control_cloze_VB_corrected = calc_results(control_baseline_VB,
-                                                             control["control_cloze_powers_VB"][iPart, iChan, :])
+            eeg_ei_control_cloze_FE_corrected = calc_results(control_baseline_FE, control["control_cloze_powers_FE"][iPart, iChan, :])
+            eeg_ei_control_cloze_VB_corrected = calc_results(control_baseline_VB, control["control_cloze_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_control_total_FE_corrected = calc_results(control_baseline_FE,
-                                                             control["control_total_powers_FE"][iPart, iChan, :])
-            eeg_ei_control_total_VB_corrected = calc_results(control_baseline_VB,
-                                                             control["control_total_powers_VB"][iPart, iChan, :])
+            eeg_ei_control_total_FE_corrected = calc_results(control_baseline_FE, control["control_total_powers_FE"][iPart, iChan, :])
+            eeg_ei_control_total_VB_corrected = calc_results(control_baseline_VB, control["control_total_powers_VB"][iPart, iChan, :])
 
             chan_result_control_yesno_FE.append(eeg_ei_control_yesno_FE_corrected)
             chan_result_control_yesno_VB.append(eeg_ei_control_yesno_VB_corrected)
@@ -198,25 +190,17 @@ def compute_eeis(yesno, openq, cloze, total):
             treatment_baseline_FE = treatment["treatment_baseline_powers_FE"][iPart, iChan, :]
             treatment_baseline_VB = treatment["treatment_baseline_powers_VB"][iPart, iChan, :]
 
-            eeg_ei_treatment_yesno_FE_corrected = calc_results(treatment_baseline_FE,
-                                                               treatment["treatment_yesno_powers_FE"][iPart, iChan, :])
-            eeg_ei_treatment_yesno_VB_corrected = calc_results(treatment_baseline_VB,
-                                                               treatment["treatment_yesno_powers_VB"][iPart, iChan, :])
+            eeg_ei_treatment_yesno_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_yesno_powers_FE"][iPart, iChan, :])
+            eeg_ei_treatment_yesno_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_yesno_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_treatment_open_FE_corrected = calc_results(treatment_baseline_FE,
-                                                              treatment["treatment_open_powers_FE"][iPart, iChan, :])
-            eeg_ei_treatment_open_VB_corrected = calc_results(treatment_baseline_VB,
-                                                              treatment["treatment_open_powers_VB"][iPart, iChan, :])
+            eeg_ei_treatment_open_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_open_powers_FE"][iPart, iChan, :])
+            eeg_ei_treatment_open_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_open_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_treatment_cloze_FE_corrected = calc_results(treatment_baseline_FE,
-                                                               treatment["treatment_cloze_powers_FE"][iPart, iChan, :])
-            eeg_ei_treatment_cloze_VB_corrected = calc_results(treatment_baseline_VB,
-                                                               treatment["treatment_cloze_powers_VB"][iPart, iChan, :])
+            eeg_ei_treatment_cloze_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_cloze_powers_FE"][iPart, iChan, :])
+            eeg_ei_treatment_cloze_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_cloze_powers_VB"][iPart, iChan, :])
 
-            eeg_ei_treatment_total_FE_corrected = calc_results(treatment_baseline_FE,
-                                                               treatment["treatment_total_powers_FE"][iPart, iChan, :])
-            eeg_ei_treatment_total_VB_corrected = calc_results(treatment_baseline_VB,
-                                                               treatment["treatment_total_powers_VB"][iPart, iChan, :])
+            eeg_ei_treatment_total_FE_corrected = calc_results(treatment_baseline_FE, treatment["treatment_total_powers_FE"][iPart, iChan, :])
+            eeg_ei_treatment_total_VB_corrected = calc_results(treatment_baseline_VB, treatment["treatment_total_powers_VB"][iPart, iChan, :])
 
             chan_result_treatment_yesno_FE.append(eeg_ei_treatment_yesno_FE_corrected)
             chan_result_treatment_yesno_VB.append(eeg_ei_treatment_yesno_VB_corrected)
