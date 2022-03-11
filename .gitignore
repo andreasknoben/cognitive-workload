@@ -6,3 +6,4 @@ eeg_processing/results
 eeg_processing/.RData
 eeg_processing/.Rhistory
 question_evaluation/survey_data.csv
+question_evaluation/results.csv
