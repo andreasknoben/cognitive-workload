@@ -50,7 +50,7 @@ check_assumptions <- function(control, treatment) {
 #' @param output Output folder
 statistical_test <- function(control, treatment, norm_viol, output) {
   output_file = paste(output, "stat_result.txt", sep = "")
-  cat("Statistics generated for the problem-solving questions", file = output_file, append = FALSE, sep = "\n")
+  cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
   for (iChan in 1:NCHANS) {
     concat_data <- c(control[iChan], treatment[iChan])
@@ -62,7 +62,7 @@ statistical_test <- function(control, treatment, norm_viol, output) {
     } else {
       test = t.test(indices ~ condition, data = test_data, var.equal = FALSE, na.action = "na.omit")
     }
-    
+
     cat(CHANS[iChan], file = output_file, append = TRUE, sep = "")
     cat(": \t", file = output_file, append = TRUE, sep = "")
     cat(toString(test), file = output_file, append = TRUE, sep = "\n")
@@ -101,13 +101,22 @@ plot_data <- function(control, treatment, output) {
 }
 
 # Read files
-open_control_FE <- read.csv("results/open/indices-control-FE.csv")
-open_treatment_FE <- read.csv("results/open/indices-treatment-FE.csv")
+control_data <- read.csv("results/cloze/indices-control-FE.csv")
+treatment_data <- read.csv("results/cloze/indices-treatment-FE.csv")
 
 # Output folder
-output_dir = "results/open/"
+output_dir = "results/cloze/"
+
+subsample = TRUE
+samplesize = 30
+
+if(subsample) {
+  control_data <- head(control_data, samplesize/2)
+  treatment_data <- head(treatment_data, samplesize/2)
+  NPARTS = samplesize
+}
 
 # Call functions
-norm_violated = check_assumptions(open_control_FE, open_treatment_FE)
-statistical_test(open_control_FE, open_treatment_FE, norm_violated, output_dir)
-plot_data(open_control_FE, open_treatment_FE, output_dir)
+norm_violated = check_assumptions(control_data, treatment_data)
+statistical_test(control_data, treatment_data, norm_violated, output_dir)
+plot_data(control_data, treatment_data, output_dir)
