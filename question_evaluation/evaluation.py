@@ -2,13 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-N_SUBJ = 38
+N_SUBJ = 58
 DATA_LOC = "survey_data.csv"
 pd.options.display.max_colwidth = 10000
-
-# Yes-no questions: simple check
-# Problem-solving: manual
-# Cloze test: automatic + manual
 
 def construct_yes_no_correct():
     '''Constructs from the answer files the correct yes no answers
@@ -69,31 +65,19 @@ def extract_answers(data):
     problem_solving_answers["FE"] = data["FE_P1":"FE_P5"]
 
     cloze_answers = dict()
-    cloze_answers["VB"] = data["Q86"]
-    cloze_answers["FE"] = data["Q88"]
+    try:
+        cloze_answers["VB"] = data["Q86"].split(";")
+    except:
+        cloze_answers["VB"] = []
+        print("[WARNING] NaN or other non-string entry detected")
+
+    try:
+        cloze_answers["FE"] = data["Q88"].split(";")
+    except:
+        cloze_answers["FE"] = []
+        print("[WARNING] NaN or other non-string entry detected")
 
     return yes_no_answers, problem_solving_answers, cloze_answers
-
-def extract_cloze_answers(cloze_answers):
-    '''Extracts answers given to the cloze test and puts them in lists.'''
-
-    answers = {"VB": [], "FE": []}
-    try:
-        answers["VB"] = cloze_answers["VB"].split(";")
-    except:
-        answers["VB"] = []
-        print("[WARNING] NaN or other non-string entry detected")
-
-    try:
-        answers["FE"] = cloze_answers["FE"].split(";")
-    except:
-        answers["FE"] = []
-        print("[WARNING] NaN or other non-string entry detected")
-    
-    answers["VB"] = answers["VB"][:-1]
-    answers["FE"] = answers["FE"][:-1]
-
-    return answers
 
 def check_yes_no(correct, answers):
     '''Checks the answers given to the yes/no questions.'''
@@ -188,7 +172,6 @@ for i in data.index:
 
     # Extract answers from participant
     yes_no_answers, problem_solving_answers, cloze_answers = extract_answers(data.loc[i])
-    cloze_answers = extract_cloze_answers(cloze_answers)
 
     # Compute scores from extracted answers
     score_yn = check_yes_no(yes_no_correct, yes_no_answers)
