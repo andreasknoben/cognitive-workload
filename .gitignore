@@ -1,0 +1,8 @@
+.Rhistory
+eeg_processing/data
+eeg_processing/powers
+eeg_processing/processed_data
+eeg_processing/results
+eeg_processing/.Rdata
+eeg_processing/.Rhistory
+question_evaluation/survey_data.csv
