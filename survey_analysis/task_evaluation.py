@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from load_data import import_survey
 
 N_SUBJ = 58
 DATA_LOC = "survey_data.csv"
@@ -46,12 +47,6 @@ def construct_cloze_correct():
 
     return answers
 
-def load_data():
-    '''Loads survey data and extracts last N_SUBJ answers.'''
-
-    survey_data = pd.read_csv(DATA_LOC)
-    subjects_data = survey_data.iloc[-N_SUBJ:]
-    return subjects_data
 
 def extract_answers(data):
     '''Extracts answers to each part from the survey data.'''
@@ -152,7 +147,7 @@ def determine_condition(ptc):
     return condition, order
 
 # Loading the data
-data = load_data()
+data = import_survey(DATA_LOC, N_SUBJ)
 
 # Constructing the correct answers
 yes_no_correct = construct_yes_no_correct()
