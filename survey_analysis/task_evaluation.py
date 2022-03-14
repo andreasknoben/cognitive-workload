@@ -175,8 +175,13 @@ def create_csvs(data, results, scores, yncorrect, clozecorrect):
                              np.sum(score_yn["VB"]), np.nan, np.nan, np.sum(score_cloze["VB"] == 1)]
 
     # Write results to CSV
-    results.to_csv("results.csv")
-    scores.to_csv("scores.csv")
+    confirm = input("Are you sure you want to overwrite results.csv and scores.csv with new computations? [y/n]")
+    if confirm.lower() == "y":
+        results.to_csv("results.csv")
+        scores.to_csv("scores.csv")
+        print("[INFO] CSVs have been written to disk.")
+    else:
+        print("[WARNING] Operation cancelled, nothing written to disk.")
 
 # Loading the data
 data = import_survey(DATA_LOC, N_SUBJ)
