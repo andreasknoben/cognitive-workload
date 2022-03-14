@@ -146,6 +146,38 @@ def determine_condition(ptc):
 
     return condition, order
 
+def create_csvs(data, results, scores, yncorrect, clozecorrect):
+    for i in data.index:
+    # Determine participant
+        part = i - 23
+        print("[INFO] Processing participant {}, index {}...".format(part, i))
+
+        # Determine condition of participant
+        cond, order = determine_condition(data.loc[i])
+
+        # Extract answers from participant
+        yes_no_answers, problem_solving_answers, cloze_answers = extract_answers(data.loc[i])
+
+        # Compute scores from extracted answers
+        score_yn = check_yes_no(yncorrect, yes_no_answers)
+        score_cloze = check_cloze(clozecorrect, cloze_answers)  
+        score_cloze_nums = {"FE": [], "VB": []}
+        for i in range(len(score_cloze["FE"])):
+            if type(score_cloze["FE"][i]) == int:
+                score_cloze_nums["FE"].append(score_cloze["FE"][i])
+            if type(score_cloze["VB"][i]) == int:
+                score_cloze_nums["VB"].append(score_cloze["FE"][i])
+        
+        # Insert scores in dataframe
+        results.iloc[part] = [cond, order, score_yn["VB"], problem_solving_answers["VB"], score_cloze["VB"], 
+                              score_yn["FE"], problem_solving_answers["FE"], score_cloze["FE"]]
+        scores.iloc[part] = [cond, order, np.sum(score_yn["FE"]), np.nan, np.nan, np.sum(score_cloze_nums["FE"]),
+                             np.sum(score_yn["VB"]), np.nan, np.nan, np.sum(score_cloze["VB"] == 1)]
+
+    # Write results to CSV
+    results.to_csv("results.csv")
+    scores.to_csv("scores.csv")
+
 # Loading the data
 data = import_survey(DATA_LOC, N_SUBJ)
 
@@ -157,23 +189,8 @@ cloze_correct = construct_cloze_correct()
 results = pd.DataFrame(columns = ["condition", "order", "VB-yes-no", "VB-problem-solving", "VB-cloze", "FE-yes-no", "FE-problem-solving", "FE-cloze"],
                         index = range(1, N_SUBJ+1))
 
-for i in data.index:
-    # Determine participant
-    part = i - 23
-    print("[INFO] Processing participant {}, index {}...".format(part, i))
+scores = pd.DataFrame(columns = ["condition", "order", "FE_yesno", "FE_open-total", "FE_open-correct", "FE_cloze-auto",
+                                 "VB_yesno", "VB_open-total", "VB_open-correct", "VB_cloze-auto"],
+                      index = range(1, N_SUBJ+1))
 
-    # Determine condition of participant
-    cond, order = determine_condition(data.loc[i])
-
-    # Extract answers from participant
-    yes_no_answers, problem_solving_answers, cloze_answers = extract_answers(data.loc[i])
-
-    # Compute scores from extracted answers
-    score_yn = check_yes_no(yes_no_correct, yes_no_answers)
-    score_cloze = check_cloze(cloze_correct, cloze_answers)  
-    
-    # Insert scores in dataframe
-    results.iloc[part] = [cond, order, score_yn["VB"], problem_solving_answers["VB"], score_cloze["VB"], score_yn["FE"], problem_solving_answers["FE"], score_cloze["FE"]]
-
-# Write results to CSV
-results.to_csv("results.csv")
+create_csvs(data, results, scores, yes_no_correct, cloze_correct)
