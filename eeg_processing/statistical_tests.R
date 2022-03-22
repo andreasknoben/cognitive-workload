@@ -111,7 +111,7 @@ time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
   for (iChan in 1:NCHANS) {
     # Plot mean for yesno, open, cloze
     plt_data <- data.frame(condition = rep(c("Control FE", "Control VB", "Treatment FE", "Treatment VB"), each = 3),
-                           task = factor(rep(c("Yes/no", "Problem-solving", "Cloze"), times = 4)),
+                           task = factor(rep(c("Yes/no", "Problem-solving", "Cloze"), times = 4), levels = c("Yes/no", "Problem-solving", "Cloze")),
                            index = c(mean(unlist(yn_c_FE[iChan]), na.rm = TRUE), mean(unlist(open_c_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_c_FE[iChan]), na.rm = TRUE),
                                      mean(unlist(yn_c_VB[iChan]), na.rm = TRUE), mean(unlist(open_c_VB[iChan]), na.rm = TRUE), mean(unlist(cloze_c_VB[iChan]), na.rm = TRUE),
                                      mean(unlist(yn_t_FE[iChan]), na.rm = TRUE), mean(unlist(open_t_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_t_FE[iChan]), na.rm = TRUE),
@@ -120,16 +120,18 @@ time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
     plot <- ggplot(data = plt_data, aes(x = task, y = index, group = condition, color = condition)) +
       geom_point() + 
       geom_line(size = 1.5) +
-      labs(title = CHANS[iChan], x = "Task", y = "EEG Engagement Index") +
-      theme(axis.text.x = element_text(size = 20),
+      geom_point(size = 1.5) +
+      labs(title = CHANS[iChan]) +
+      theme(axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
             axis.text.y = element_text(size = 20),
             plot.title = element_text(size = 28, hjust = 0.5),
-            axis.title.x = element_text(size = 18),
-            axis.title.y = element_text(size = 18),
-            legend.title = element_text(size = 18),
-            legend.text = element_text(size = 16))
+            legend.position = "none") + 
+      scale_color_manual(values = c("seagreen2", "seagreen4", "deepskyblue2", "deepskyblue4"))
     
-    svg(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), width = 8, height = 6)
+    svg(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), width = 3.25, height = 3.75)
     print(plot)
     dev.off()
   }
@@ -151,13 +153,13 @@ cloze_control_VB <- read.csv("results/cloze/indices-control-VB.csv")
 cloze_treatment_FE <- read.csv("results/cloze/indices-treatment-FE.csv")
 cloze_treatment_VB <- read.csv("results/cloze/indices-treatment-VB.csv")
 
-control_data <- cloze_control_FE
-treatment_data <- cloze_treatment_FE
+control_data <- open_control_FE
+treatment_data <- open_treatment_FE
 
 # Output folder
-output_dir = "results/cloze/"
+output_dir = "results/open/"
 
-subsample = TRUE
+subsample = FALSE
 samplesize = 30
 
 if(subsample) {
