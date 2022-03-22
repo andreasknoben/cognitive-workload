@@ -100,9 +100,59 @@ plot_data <- function(control, treatment, output) {
   }
 }
 
+#' Plots EEG Engagement Index course over the three tasks
+#' 
+#' Generates a plot for each channel with the course of the EEG Engagement Index
+#' for each condition and model combination.
+#' @param yn|open|cloze_c|t_FE|VB Data for a task/condition/model
+time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
+                       open_c_FE, open_c_VB, open_t_FE, open_t_VB,
+                       cloze_c_FE, cloze_c_VB, cloze_t_FE, cloze_t_VB) {
+  for (iChan in 1:NCHANS) {
+    # Plot mean for yesno, open, cloze
+    plt_data <- data.frame(condition = rep(c("Control FE", "Control VB", "Treatment FE", "Treatment VB"), each = 3),
+                           task = factor(rep(c("Yes/no", "Problem-solving", "Cloze"), times = 4)),
+                           index = c(mean(unlist(yn_c_FE[iChan]), na.rm = TRUE), mean(unlist(open_c_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_c_FE[iChan]), na.rm = TRUE),
+                                     mean(unlist(yn_c_VB[iChan]), na.rm = TRUE), mean(unlist(open_c_VB[iChan]), na.rm = TRUE), mean(unlist(cloze_c_VB[iChan]), na.rm = TRUE),
+                                     mean(unlist(yn_t_FE[iChan]), na.rm = TRUE), mean(unlist(open_t_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_t_FE[iChan]), na.rm = TRUE),
+                                     mean(unlist(yn_t_VB[iChan]), na.rm = TRUE), mean(unlist(open_t_VB[iChan]), na.rm = TRUE), mean(unlist(open_t_VB[iChan]), na.rm = TRUE)))
+    
+    plot <- ggplot(data = plt_data, aes(x = task, y = index, group = condition, color = condition)) +
+      geom_point() + 
+      geom_line(size = 1.5) +
+      labs(title = CHANS[iChan], x = "Task", y = "EEG Engagement Index") +
+      theme(axis.text.x = element_text(size = 20),
+            axis.text.y = element_text(size = 20),
+            plot.title = element_text(size = 28, hjust = 0.5),
+            axis.title.x = element_text(size = 18),
+            axis.title.y = element_text(size = 18),
+            legend.title = element_text(size = 18),
+            legend.text = element_text(size = 16))
+    
+    svg(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), width = 8, height = 6)
+    print(plot)
+    dev.off()
+  }
+}
+
 # Read files
-control_data <- read.csv("results/cloze/indices-control-FE.csv")
-treatment_data <- read.csv("results/cloze/indices-treatment-FE.csv")
+yesno_control_FE <- read.csv("results/yesno/indices-control-FE.csv")
+yesno_control_VB <- read.csv("results/yesno/indices-control-VB.csv")
+yesno_treatment_FE <- read.csv("results/yesno/indices-treatment-FE.csv")
+yesno_treatment_VB <- read.csv("results/yesno/indices-treatment-VB.csv")
+
+open_control_FE <- read.csv("results/open/indices-control-FE.csv")
+open_control_VB <- read.csv("results/open/indices-control-VB.csv")
+open_treatment_FE <- read.csv("results/open/indices-treatment-FE.csv")
+open_treatment_VB <- read.csv("results/open/indices-treatment-VB.csv")
+
+cloze_control_FE <- read.csv("results/cloze/indices-control-FE.csv")
+cloze_control_VB <- read.csv("results/cloze/indices-control-VB.csv")
+cloze_treatment_FE <- read.csv("results/cloze/indices-treatment-FE.csv")
+cloze_treatment_VB <- read.csv("results/cloze/indices-treatment-VB.csv")
+
+control_data <- cloze_control_FE
+treatment_data <- cloze_treatment_FE
 
 # Output folder
 output_dir = "results/cloze/"
@@ -120,3 +170,7 @@ if(subsample) {
 norm_violated = check_assumptions(control_data, treatment_data)
 statistical_test(control_data, treatment_data, norm_violated, output_dir)
 plot_data(control_data, treatment_data, output_dir)
+
+time_plots(yesno_control_FE, yesno_control_VB, yesno_treatment_FE, yesno_treatment_VB,
+           open_control_FE, open_control_VB, open_treatment_FE, open_treatment_VB,
+           cloze_control_FE, cloze_control_VB, cloze_treatment_FE, cloze_treatment_VB)
