@@ -255,9 +255,9 @@ function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
     alphaIdx = find(freqs>8 & freqs<13);
     betaIdx  = find(freqs>13 & freqs<30);
 
-    thetaPower = 10^(mean(spectra(thetaIdx))/10);
-    alphaPower = 10^(mean(spectra(alphaIdx))/10);
-    betaPower  = 10^(mean(spectra(betaIdx))/10);
+    thetaPower = mean(10.^(spectra(thetaIdx)/10));
+    alphaPower = mean(10.^(spectra(alphaIdx)/10));
+    betaPower  = mean(10.^(spectra(betaIdx)/10));
 
     % Check: are the powers non-zero?
     if thetaPower < 0
