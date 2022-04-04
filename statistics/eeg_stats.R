@@ -85,7 +85,7 @@ plot_data <- function(control, treatment, output) {
     
     plot <- ggplot(data = na.omit(plt_data)) +
       geom_boxplot(aes(x = condition, y = indices),
-                   fill = c("#56B4E9", "#009E73")) +
+                   fill = c("#458aff", "#009E73")) +
       labs(title = CHANS[iChan]) +
       theme(axis.title.x = element_blank(),
             axis.title.y = element_blank(),
@@ -143,10 +143,10 @@ yesno_control_VB <- read.csv("results/yesno/indices-control-VB.csv")
 yesno_treatment_FE <- read.csv("results/yesno/indices-treatment-FE.csv")
 yesno_treatment_VB <- read.csv("results/yesno/indices-treatment-VB.csv")
 
-open_control_FE <- read.csv("results/open/indices-control-FE.csv")
-open_control_VB <- read.csv("results/open/indices-control-VB.csv")
-open_treatment_FE <- read.csv("results/open/indices-treatment-FE.csv")
-open_treatment_VB <- read.csv("results/open/indices-treatment-VB.csv")
+open_control_FE <- read.csv("results/open/indices_control-FE.csv")
+open_control_VB <- read.csv("results/open/indices_control-VB.csv")
+open_treatment_FE <- read.csv("results/open/indices_treatment-FE.csv")
+open_treatment_VB <- read.csv("results/open/indices_treatment-VB.csv")
 
 cloze_control_FE <- read.csv("results/cloze/indices-control-FE.csv")
 cloze_control_VB <- read.csv("results/cloze/indices-control-VB.csv")
