@@ -61,13 +61,15 @@ def extract_answers(data):
 
     cloze_answers = dict()
     try:
-        cloze_answers["VB"] = data["Q86"].split(";")
+        cloze_answers_VB = data["Q86"].split(";")
+        cloze_answers["VB"] = [a.strip() for a in cloze_answers_VB]
     except:
         cloze_answers["VB"] = []
         print("[WARNING] NaN or other non-string entry detected")
 
     try:
-        cloze_answers["FE"] = data["Q88"].split(";")
+        cloze_answers_FE = data["Q88"].split(";")
+        cloze_answers["FE"] = [a.strip() for a in cloze_answers_FE]
     except:
         cloze_answers["FE"] = []
         print("[WARNING] NaN or other non-string entry detected")
@@ -150,7 +152,7 @@ def create_csvs(data, results, scores, yncorrect, clozecorrect):
     for i in data.index:
     # Determine participant
         part = i - 23
-        print("[INFO] Processing participant {}, index {}...".format(part, i))
+        print("[INFO] Processing participant {}, index {}...".format(part+1, i))
 
         # Determine condition of participant
         cond, order = determine_condition(data.loc[i])
@@ -166,13 +168,13 @@ def create_csvs(data, results, scores, yncorrect, clozecorrect):
             if type(score_cloze["FE"][i]) == int:
                 score_cloze_nums["FE"].append(score_cloze["FE"][i])
             if type(score_cloze["VB"][i]) == int:
-                score_cloze_nums["VB"].append(score_cloze["FE"][i])
+                score_cloze_nums["VB"].append(score_cloze["VB"][i])
         
         # Insert scores in dataframe
         results.iloc[part] = [cond, order, score_yn["VB"], problem_solving_answers["VB"], score_cloze["VB"], 
                               score_yn["FE"], problem_solving_answers["FE"], score_cloze["FE"]]
         scores.iloc[part] = [cond, order, np.sum(score_yn["FE"]), np.nan, np.nan, np.sum(score_cloze_nums["FE"]),
-                             np.sum(score_yn["VB"]), np.nan, np.nan, np.sum(score_cloze["VB"] == 1)]
+                             np.sum(score_yn["VB"]), np.nan, np.nan, np.sum(score_cloze_nums["VB"])]
 
     # Write results to CSV
     confirm = input("Are you sure you want to overwrite results.csv and scores.csv with new computations? [y/n]")
