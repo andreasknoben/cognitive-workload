@@ -1,9 +1,9 @@
 % Calculate spectral powers from pre-processed data
 
 % Create folder variables
-dir_data_control = 'processed-data/control';
-dir_data_treatment = 'processed-data/treatment';
-dir_results = 'powers';
+dir_data_control = 'data/processed/control';
+dir_data_treatment = 'data/processed/treatment';
+dir_results = 'data/powers';
 
 % Function calls and saving data
 [control_baseline_powers_FE, control_total_powers_FE, control_yesno_powers_FE, control_open_powers_FE, control_cloze_powers_FE, ...

@@ -75,8 +75,8 @@ function results = fill_matrices(NCHAN, NPART, CHANS)
     cloze = create_matrices(NPART, NCHAN);
     total = create_matrices(NPART, NCHAN);
 
-    control_powers = load('powers/control.mat');
-    treatment_powers = load('powers/treatment.mat');
+    control_powers = load('data/powers/control.mat');
+    treatment_powers = load('data/powers/treatment.mat');
 
     % Loop over channels
     for iChan = 1:NCHAN
@@ -159,7 +159,7 @@ function written = write_to_files(results)
     %                    |
     %                    |-- condition (matrix)
 
-    task_dirs = ["results/yesno/" "results/open/" "results/cloze/" "results/total/"];
+    task_dirs = ["data/indices/yesno/" "data/indices/open/" "data/indices/cloze/" "data/indices/total/"];
     labels = ["control_FE" "treatment_FE" "control_VB" "treatment_VB"];
     col_names = {'Fp1' 'Fp2' 'F3' 'Fz' 'F4' 'T7' 'C3' 'Cz' 'C4' 'T8' 'P3' 'Pz' 'P4' 'PO7' 'PO8' 'Oz'};
     outer = fieldnames(results);
