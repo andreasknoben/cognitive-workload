@@ -179,8 +179,8 @@ def create_csvs(data, results, scores, yncorrect, clozecorrect):
     # Write results to CSV
     confirm = input("Are you sure you want to overwrite results.csv and scores.csv with new computations? [y/n]")
     if confirm.lower() == "y":
-        results.to_csv("results.csv")
-        scores.to_csv("scores.csv")
+        results.to_csv("extracted/results.csv")
+        scores.to_csv("extracted/scores.csv")
         print("[INFO] CSVs have been written to disk.")
     else:
         print("[WARNING] Operation cancelled, nothing written to disk.")
