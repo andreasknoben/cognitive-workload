@@ -1,17 +1,17 @@
 % Generate some basic data statistics from the raw EEG data
 
 % Set folder variables
-dir_control = "data/control";
-dir_treatment = "data/treatment";
+dir_control = "data/raw/control";
+dir_treatment = "data/raw/treatment";
 
 % Create statistics and write to file
 [control_statistics_FE, control_statistics_VB] = generate_statistics(dir_control);
-write_to_file(control_statistics_FE, 'results/data_stats_control_FE.csv');
-write_to_file(control_statistics_VB, 'results/data_stats_control_VB.csv');
+write_to_file(control_statistics_FE, 'results/statistics/data_statistics/control_FE.csv');
+write_to_file(control_statistics_VB, 'results/statistics/data_statistics/control_VB.csv');
 
 [treatment_statistics_FE, treatment_statistics_VB] = generate_statistics(dir_treatment);
-write_to_file(treatment_statistics_FE, 'results/data_stats_treatment_FE.csv');
-write_to_file(treatment_statistics_VB, 'results/data_stats_treatment_VB.csv');
+write_to_file(treatment_statistics_FE, 'results/statistics/data_statistics/treatment_FE.csv');
+write_to_file(treatment_statistics_VB, 'results/statistics/data_statistics/treatment_VB.csv');
 
 function [statistics_FE, statistics_VB] = generate_statistics(data_dir)
     % generate_statistics() - Generate some basic data statistics

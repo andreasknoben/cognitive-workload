@@ -1,10 +1,10 @@
 % Pre-process EEG data
 % Create folder variables
-dir_control = "data/control";
-dir_treatment = "data/treatment";
+dir_control = "data/raw/control";
+dir_treatment = "data/raw/treatment";
 
-dir_control_processed = "processed-data/control";
-dir_treatment_processed = "processed-data/treatment";
+dir_control_processed = "data/processed/control";
+dir_treatment_processed = "data/processed/treatment";
 
 process_control = process_dir(dir_control, dir_control_processed);
 process_treatment = process_dir(dir_treatment, dir_treatment_processed);
