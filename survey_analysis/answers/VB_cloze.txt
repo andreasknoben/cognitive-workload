@@ -16,8 +16,8 @@ route,trips,number
 number
 more
 each,every
-special
 town,city
+special
 trip,tour
 each,every
 trip,tour
@@ -38,7 +38,7 @@ maintenance,repair,repairs
 maintenance
 problem
 description
-maintenance,repairrepairs
+maintenance,repair,repairs
 average,mean
 problem
 maintenance
