@@ -22,7 +22,7 @@ order,purchase,buy,refill,restock,replace
 ordered,inventory,received,department,division,on hand
 bins
 parts,part
-bins
+bins,bin
 weight
 mechanics,mechanic
 skill,skills
