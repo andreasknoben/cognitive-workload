@@ -15,12 +15,12 @@ def construct_yes_no_correct():
 
     answers = dict()
 
-    with open('answers/FE_yesno.txt') as ansfile:
+    with open('answers/FE-yesno.txt') as ansfile:
         ans = ansfile.readlines()
         ans = [a.strip() for a in ans]
         answers['FE'] = ans
 
-    with open('answers/VB_yesno.txt') as ansfile:
+    with open('answers/VB-yesno.txt') as ansfile:
         ans = ansfile.readlines()
         ans = [a.strip() for a in ans]
         answers['VB'] = ans
@@ -37,14 +37,14 @@ def construct_cloze_correct():
 
     answers = {'FE': [], 'VB': []}
 
-    with open('answers/FE_cloze.txt') as ansfile:
+    with open('answers/FE-cloze.txt') as ansfile:
         FE_answers = ansfile.readlines()
         for q in FE_answers:
             ans = q.split(',')
             ans = [a.strip() for a in ans]
             answers['FE'].append(ans)
 
-    with open('answers/VB_cloze.txt') as ansfile:
+    with open('answers/VB-cloze.txt') as ansfile:
         VB_answers = ansfile.readlines()
         for q in VB_answers:
             ans = q.split(',')
