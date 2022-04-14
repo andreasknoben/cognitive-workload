@@ -22,17 +22,25 @@ The `preprocess.m` file is a MATLAB script that aims to preprocess the EEG data 
 ### process_filename.m
 The `process_filename.m` file is a function that is used by multiple other scripts to extract subject, model, and condition from the filename.
 
-### statistical_tests.R
+## Statistics
+
+### eeg_stats.R
 The `statistical_tests.R` file is an R script that runs on the EEG Engagement Indices. It checks normality for each channel. If the normality assumption is violated, it runs a Mann-Whitney U test to compare the LOEM and HOEM groups. If the normality assumption is not violated, it runs a Welch independent samples t-test. The results are stored in the respective folder for the task in the `results` folder.
 
-## Question Evaluation
-The `question-evaluation` folder contains the code that allows to check the questions automatically for as much as possible.
+## Survey analysis
+The `survey-analysis` folder contains the code that allows to check the questions automatically for as much as possible.
 
 ### answers
 The `answers` subfolder contains the files with the correct answers according to Gemino (1999). These are provided in plain text files.
 
-### evaluation.ipynb
-The `evaluation.py` script allows to evaluate the answers given in the Qualtrics survey as automatic as possible. It loads the survey data file (CSV) and determines the participant's condition. For the yes/no questions, it inserts a 1 if the answer was correct and a 0 if the answer was incorrect. For the cloze test, it inserts a 1 if there is an exact match and leaves the word if not (to check manually for typos or synonyms). The problem-solving questions are left untouched. These results are then output to a new `results.csv` file.
+### extract_questionnaires.py
+The `extract_questionnaires.py` script extracts the specified columns from the raw survey data, and extracts: 1) the pre-experiment questionnaire, which collected demographics and pre-experiment ERD and domain knowledge; 2) NASA-TLX for each model; 3) the post-experiment questionnaire asking about the experience the participant had in the experiment. It exports these items to a new CSV file.
+
+### load_data.py
+Data loader function: this loads the specified survey data and returns the last _N_ rows of it (where _N_ corresponds to the number of participants).
+
+### task_evaluation.py
+The `task_evaluation.py` script allows to evaluate the answers given in the Qualtrics survey as automatic as possible. It loads the survey data file (CSV) and determines the participant's condition. For the yes/no questions, it inserts a 1 if the answer was correct and a 0 if the answer was incorrect. For the cloze test, it inserts a 1 if there is an exact match and leaves the word if not (to check manually for typos or synonyms). The problem-solving questions are left untouched. These results are then output to a new `results.csv` file.
 
 ## References
 Gemino, A. C. (1999). _Empirical comparisons of system analysis modeling techniques_ (Doctoral dissertation, University of British Columbia).
