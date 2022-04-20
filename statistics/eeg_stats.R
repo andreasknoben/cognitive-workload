@@ -153,23 +153,11 @@ cloze_control_VB <- read.csv("results/cloze/indices-control-VB.csv")
 cloze_treatment_FE <- read.csv("results/cloze/indices-treatment-FE.csv")
 cloze_treatment_VB <- read.csv("results/cloze/indices-treatment-VB.csv")
 
-control_data <- open_control_FE
-treatment_data <- open_treatment_FE
-
 # Output folder
 output_dir = "results/open/"
 
-subsample = FALSE
-samplesize = 30
-
-if(subsample) {
-  control_data <- head(control_data, samplesize/2)
-  treatment_data <- head(treatment_data, samplesize/2)
-  NPARTS = samplesize
-}
-
 # Call functions
-norm_violated = check_assumptions(control_data, treatment_data)
+norm_violated = check_assumptions(yesno_control_FE, yesno_treatment_FE)
 statistical_test(control_data, treatment_data, norm_violated, output_dir)
 plot_data(control_data, treatment_data, output_dir)
 
