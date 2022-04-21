@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from load_data import import_survey
+from survey_funcs import import_survey, determine_condition
 
 N_SUBJ = 58
 DATA_LOC = 'survey_data.csv'
@@ -39,6 +39,29 @@ def save_cols(target_df, g, *colnames):
         target_df[colnames[i]] = g.__next__()
     return target_df
 
+def process_nasatlx(df):
+    nasatlx_colnames = ["fe.nasatlx.1", "fe.nasatlx.2", "fe.nasatlx.3", "fe.nasatlx.4", "fe.nasatlx.5", "vb.nasatlx.1", "vb.nasatlx.2", "vb.nasatlx.3", "vb.nasatlx.4", "vb.nasatlx.5"]
+    nasatlx = pd.DataFrame(columns = nasatlx_colnames)
+
+    nasatlx_1_cols = ['Q107_4', 'Q117_4', 'Q108_1', 'Q109_1', 'Q110_4']
+    nasatlx_2_cols = ['Q95_1',  'Q96_1',  'Q97_1',  'Q98_1',  'Q99_1']
+
+    for i in df.index:
+        part = i - 23
+        cond, order = determine_condition(df.loc[i])
+        if cond == "control":
+            if order[1] == "FE":
+                nasatlx.loc[part, nasatlx_colnames[:5]] = df.loc[i, nasatlx_1_cols].astype(int).to_numpy()
+                nasatlx.loc[part, nasatlx_colnames[5:]] = [np.nan] * 5
+            elif order[1] == "VB":
+                nasatlx.loc[part, nasatlx_colnames[:5]] = [np.nan] * 5
+                nasatlx.loc[part, nasatlx_colnames[5:]] = df.loc[i, nasatlx_1_cols].astype(int).to_numpy()
+        elif cond == "treatment":
+            nasatlx.loc[part, nasatlx_colnames[:5]] = df.loc[i, nasatlx_1_cols].astype(int).to_numpy()
+            nasatlx.loc[part, nasatlx_colnames[5:]] = df.loc[i, nasatlx_2_cols].astype(int).to_numpy()
+
+    return nasatlx
+
 def write_output(data):
     '''
     Creates the output dataframe using the appropriate function calls and writes it to questionnaire-answers.csv
@@ -57,6 +80,7 @@ def write_output(data):
                                                         'RFK.1', 'RFK.2', 'RFK.3', 'RFK.4', 'RFK.5', 'RFK.6')
     output = save_cols(output, generate_cols(data, str, 'Understand1', 'Understand2', 'Use1', 'Use2R', 'Load1', 'ENG1', 'ENG2', 'ENG3'),
                         'understand.1', 'understand.2', 'use.1', 'use.2', 'load', 'eng.1', 'eng.2', 'eng.3')
+    output = pd.concat([output, process_nasatlx(data)], axis = 1)
 
     output.to_csv('extracted/questionnaire-answers.csv')
 

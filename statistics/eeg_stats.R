@@ -2,12 +2,13 @@
 library(ggplot2)
 
 # Set working directory to /eeg_processing/ folder before starting!
-setwd("~/Nextcloud/Projects/cognitive-workload/eeg_processing/")
+setwd("~/Nextcloud/Projects/cognitive-workload/eeg_processing")
 
-# Set global variables
+# Set global variables (constant)
 NPARTS <- 58
 NCHANS <- 16
 CHANS <- c('Fp1', 'Fp2', 'F3', 'Fz', 'F4', 'T7', 'C3', 'Cz', 'C4', 'T8', 'P3', 'Pz', 'P4', 'PO7', 'PO8', 'Oz')
+
 
 #' Check the data for normality
 #'
@@ -16,27 +17,26 @@ CHANS <- c('Fp1', 'Fp2', 'F3', 'Fz', 'F4', 'T7', 'C3', 'Cz', 'C4', 'T8', 'P3', '
 #' @param control The vector with control data
 #' @param treatment The vector with treatment data
 #' @return Returns a vector with the channels for which normality is violated
+#' 
 check_assumptions <- function(control, treatment) {
-  # Check assumptions
   norm_viol <- vector()
 
   for(iChan in 1:NCHANS) {
     control_data <- control[iChan][!is.na(control[iChan])]
     shapiro_test <- shapiro.test(control_data)
     if(shapiro_test$p.value < 0.05) {
-      print(paste("[INFO] (control) Normality of channel ", CHANS[iChan], " violated, p = ", shapiro_test$p.value))
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
     
     treatment_data <- treatment[iChan][!is.na(treatment[iChan])]
     shapiro_test <- shapiro.test(treatment_data)
     if(shapiro_test$p.value < 0.05) {
-      print(paste("[INFO] (treatment) Normality of channel ", CHANS[iChan], " violated, p = ", shapiro_test$p.value))
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
   }
   return(norm_viol)
 }
+
 
 #' Run the appropriate statistical test on the data
 #'
@@ -48,19 +48,20 @@ check_assumptions <- function(control, treatment) {
 #' @param treatment The vector with treatment data
 #' @param norm_viol Vector with channels for which normality is violated
 #' @param output Output folder
-statistical_test <- function(control, treatment, norm_viol, output) {
-  output_file = paste(output, "stat_result.txt", sep = "")
+#' 
+statistical_test <- function(control, treatment, norm_viol, task, mod) {
+  output_file = paste("results/statistics/statistical_tests/", mod, "-", task, "-", "result.txt", sep = "")
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
   for (iChan in 1:NCHANS) {
     concat_data <- c(control[iChan], treatment[iChan])
     test_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS/2),
                             indices = unlist(concat_data))
-    
+
     if (CHANS[iChan] %in% norm_viol) {
-      test = wilcox.test(indices ~ condition, data = test_data, na.action = "na.omit")
+      test <- wilcox.test(indices ~ condition, data = test_data, na.action = "na.omit", conf.int = TRUE)
     } else {
-      test = t.test(indices ~ condition, data = test_data, var.equal = FALSE, na.action = "na.omit")
+      test <- t.test(indices ~ condition, data = test_data, var.equal = FALSE, na.action = "na.omit")
     }
 
     cat(CHANS[iChan], file = output_file, append = TRUE, sep = "")
@@ -69,6 +70,7 @@ statistical_test <- function(control, treatment, norm_viol, output) {
   }
 }
 
+
 #' Plots the EEG Engagement Indices
 #'
 #' For each channel, it creates a boxplot showing the control and treatment groups.
@@ -76,12 +78,14 @@ statistical_test <- function(control, treatment, norm_viol, output) {
 #' @param control The vector with control data
 #' @param treatment The vector with treatment data
 #' @param output Output folder
-plot_data <- function(control, treatment, output) {
+#' 
+plot_data <- function(control, treatment, task, mod) {
+  output <- paste("results/plots/", task, "/", sep = "")
   # Create svg plot for each channel
   for (iChan in 1:NCHANS) {
     concat_data <- c(control[iChan], treatment[iChan])
     plt_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS/2),
-                            indices = unlist(concat_data))
+                           indices = unlist(concat_data))
     
     plot <- ggplot(data = na.omit(plt_data)) +
       geom_boxplot(aes(x = condition, y = indices),
@@ -94,11 +98,10 @@ plot_data <- function(control, treatment, output) {
             axis.text.y = element_text(size = 20),
             plot.title = element_text(size = 28, hjust = 0.5))
     
-    svg(paste(output, "chan", CHANS[iChan], ".svg", sep=""), width = 3.25, height = 3.75)
-    print(plot)
-    dev.off()
+    ggsave(paste(output, mod, "-chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
   }
 }
+
 
 #' Plots EEG Engagement Index course over the three tasks
 #' 
@@ -131,36 +134,63 @@ time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
             legend.position = "none") + 
       scale_color_manual(values = c("seagreen2", "seagreen4", "deepskyblue2", "deepskyblue4"))
     
-    svg(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), width = 3.25, height = 3.75)
-    print(plot)
-    dev.off()
+    ggsave(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
   }
 }
 
 # Read files
-yesno_control_FE <- read.csv("results/yesno/indices-control-FE.csv")
-yesno_control_VB <- read.csv("results/yesno/indices-control-VB.csv")
-yesno_treatment_FE <- read.csv("results/yesno/indices-treatment-FE.csv")
-yesno_treatment_VB <- read.csv("results/yesno/indices-treatment-VB.csv")
+yesno_control_FE <- read.csv("data/indices/yesno/indices_control_FE.csv")
+yesno_control_VB <- read.csv("data/indices/yesno/indices_control_VB.csv")
+yesno_treatment_FE <- read.csv("data/indices/yesno/indices_treatment_FE.csv")
+yesno_treatment_VB <- read.csv("data/indices/yesno/indices_treatment_VB.csv")
 
-open_control_FE <- read.csv("results/open/indices_control-FE.csv")
-open_control_VB <- read.csv("results/open/indices_control-VB.csv")
-open_treatment_FE <- read.csv("results/open/indices_treatment-FE.csv")
-open_treatment_VB <- read.csv("results/open/indices_treatment-VB.csv")
+open_control_FE <- read.csv("data/indices/open/indices_control_FE.csv")
+open_control_VB <- read.csv("data/indices/open/indices_control_VB.csv")
+open_treatment_FE <- read.csv("data/indices/open/indices_treatment_FE.csv")
+open_treatment_VB <- read.csv("data/indices/open/indices_treatment_VB.csv")
 
-cloze_control_FE <- read.csv("results/cloze/indices-control-FE.csv")
-cloze_control_VB <- read.csv("results/cloze/indices-control-VB.csv")
-cloze_treatment_FE <- read.csv("results/cloze/indices-treatment-FE.csv")
-cloze_treatment_VB <- read.csv("results/cloze/indices-treatment-VB.csv")
+cloze_control_FE <- read.csv("data/indices/cloze/indices_control_FE.csv")
+cloze_control_VB <- read.csv("data/indices/cloze/indices_control_VB.csv")
+cloze_treatment_FE <- read.csv("data/indices/cloze/indices_treatment_FE.csv")
+cloze_treatment_VB <- read.csv("data/indices/cloze/indices_treatment_VB.csv")
 
 # Output folder
-output_dir = "results/open/"
+output_dir = "results/statistics/statistical_tests/"
+curr_task = "yesno"
+curr_mod = "FE"
 
 # Call functions
 norm_violated = check_assumptions(yesno_control_FE, yesno_treatment_FE)
-statistical_test(control_data, treatment_data, norm_violated, output_dir)
-plot_data(control_data, treatment_data, output_dir)
+statistical_test(yesno_control_FE, yesno_treatment_FE, norm_violated, curr_task, curr_mod)
+plot_data(yesno_control_FE, yesno_treatment_FE, curr_task, curr_mod)
 
-time_plots(yesno_control_FE, yesno_control_VB, yesno_treatment_FE, yesno_treatment_VB,
-           open_control_FE, open_control_VB, open_treatment_FE, open_treatment_VB,
-           cloze_control_FE, cloze_control_VB, cloze_treatment_FE, cloze_treatment_VB)
+curr_mod = "VB"
+norm_violated = check_assumptions(yesno_control_VB, yesno_treatment_VB)
+statistical_test(yesno_control_VB, yesno_treatment_VB, norm_violated, curr_task, curr_mod)
+plot_data(yesno_control_VB, yesno_treatment_VB, curr_task, curr_mod)
+
+curr_task = "open"
+curr_mod = "FE"
+norm_violated = check_assumptions(open_control_FE, open_treatment_FE)
+statistical_test(open_control_FE, open_treatment_FE, norm_violated, curr_task, curr_mod)
+plot_data(open_control_FE, open_treatment_FE, curr_task, curr_mod)
+
+curr_mod = "VB"
+norm_violated = check_assumptions(open_control_VB, open_treatment_VB)
+statistical_test(open_control_VB, open_treatment_VB, norm_violated, curr_task, curr_mod)
+plot_data(open_control_VB, open_treatment_VB, curr_task, curr_mod)
+
+curr_task = "cloze"
+curr_mod = "FE"
+norm_violated <- check_assumptions(cloze_control_FE, cloze_treatment_FE)
+statistical_test(cloze_control_FE, cloze_treatment_FE, norm_violated, curr_task, curr_mod)
+plot_data(cloze_control_FE, cloze_treatment_FE, curr_task, curr_mod)
+
+curr_mod = "VB"
+norm_violated = check_assumptions(cloze_control_VB, cloze_treatment_VB)
+statistical_test(cloze_control_VB, cloze_treatment_VB, norm_violated, curr_task, curr_mod)
+plot_data(cloze_control_VB, cloze_treatment_VB, curr_task, curr_mod)
+
+# time_plots(yesno_control_FE, yesno_control_VB, yesno_treatment_FE, yesno_treatment_VB,
+#           open_control_FE, open_control_VB, open_treatment_FE, open_treatment_VB,
+#           cloze_control_FE, cloze_control_VB, cloze_treatment_FE, cloze_treatment_VB)

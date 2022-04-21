@@ -164,38 +164,6 @@ def check_cloze(correct, answers):
             
     return scores
 
-def determine_condition(ptc):
-    '''Determines the condition a participant is in.
-        - FL_71 -> control; FL_81 -> treatment
-        - FL_51|FL_66 -> VB|FE (control)
-        - FL_59|FL_75 -> VB|FE (treatment)
-
-        Parameters:
-            ptc (pd.DataFrame): Row for a particular participant from the survey data
-
-        Returns:
-            condition (str): The condition that the participant is in (control (LOEM) or treatment (HOEM))
-            order (list): The order of models that the participant received (FE and VB)
-    '''
-
-    condition = ''
-    order = []
-
-    if ptc['FL_87_DO'] == 'FL_72':
-        condition = 'control'
-        if ptc['FL_72_DO'] == 'FL_51|FL_66':
-            order = ['VB', 'FE']
-        elif ptc['FL_72_DO'] == 'FL_66|FL_51':
-            order = ['FE', 'VB']
-    elif ptc['FL_87_DO'] == 'FL_81':
-        condition = 'treatment'
-        if ptc['FL_81_DO'] == 'FL_59|FL_75':
-            order = ['VB', 'FE']
-        elif ptc['FL_81_DO'] == 'FL_75|FL_59':
-            order = ['FE', 'VB']
-
-    return condition, order
-
 def write_results(data, results_df, yncorrect, clozecorrect):
     '''Writes the CSV file with the extracted answers to the questions to task-results.csv
     
@@ -237,7 +205,6 @@ def write_scores(data, scores_df, yncorrect):
     elif confirm_write.lower() == 'n':
         write = False
         print("[INFO] Scores file will not be written")
-        return False
 
     if write:
         for i in data.index:
