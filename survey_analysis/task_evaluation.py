@@ -205,6 +205,7 @@ def write_scores(data, scores_df, yncorrect):
     elif confirm_write.lower() == 'n':
         write = False
         print("[INFO] Scores file will not be written")
+        return False
 
     if write:
         for i in data.index:
