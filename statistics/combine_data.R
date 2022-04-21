@@ -66,12 +66,12 @@ create_wide_data <- function(eeg, scores, question) {
     }
   }
 
-  task_cols = colnames(scores)[c(4:length(colnames(scores)))]
-  df[,task_cols] <- scores[c(4:length(task_cols))]
+  task_cols <- colnames(scores)[c(4:length(colnames(scores)))]
+  df[,task_cols] <- scores[c(4:ncol(scores))]
   
   question_cols <- colnames(question)[c(4:length(colnames(question)))]
-  df[,question_cols] <- question[c(4:length(question_cols))]
-  
+  df[,question_cols] <- question[c(4:ncol(question))]
+
   return(df)
 }
 
