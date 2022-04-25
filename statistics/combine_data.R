@@ -80,4 +80,4 @@ task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
 
 complete.data <- create_wide_data(eeg.index, task.scores, questionnaire)
-write.csv(complete.data, "statistics/complete-data.csv", row.names = FALSE)
+write.csv(complete.data, "statistics/complete-data/complete-data.csv", row.names = FALSE)

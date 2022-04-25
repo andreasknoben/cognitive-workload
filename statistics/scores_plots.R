@@ -1,5 +1,7 @@
 setwd("~/Nextcloud/Projects/cognitive-workload/statistics/")
 
+library(ggplot2)
+
 create_long_scores <- function(fe_data, vb_data) {
   long_scores <- vector(length = 116)
   j <- 1
@@ -26,13 +28,12 @@ create_long_form <- function(data) {
                         open.total = create_long_scores(data$FE.open.total, data$VB.open.total),
                         open.correct = create_long_scores(data$FE.open.correct, data$VB.open.correct),
                         cloze = create_long_scores(data$FE.cloze, data$VB.cloze))
-  View(long_df)
   return(long_df)
 }
 
 plot_scores <- function(data) {
   yn_plot <- ggplot(data = data, aes(x = condition, y = yesno, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_boxplot(stat = "identity", position = "dodge") +
     labs(title = "Yes no questions", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
@@ -42,7 +43,7 @@ plot_scores <- function(data) {
   dev.off()
   
   opent_plot <- ggplot(data = data, aes(x = condition, y = open.total, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_boxplot(stat = "identity", position = "dodge") +
     labs(title = "Problems-solving (total)", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
@@ -52,7 +53,7 @@ plot_scores <- function(data) {
   dev.off()
   
   openc_plot <- ggplot(data = data, aes(x = condition, y = open.correct, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_boxplot(stat = "identity", position = "dodge") +
     labs(title = "Problems-solving (correct)", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
@@ -62,7 +63,7 @@ plot_scores <- function(data) {
   dev.off()
   
   cloze_plot <- ggplot(data = data, aes(x = condition, y = cloze, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
+    geom_boxplot(stat = "identity", position = "dodge") +
     labs(title = "Cloze test", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
@@ -72,5 +73,5 @@ plot_scores <- function(data) {
   dev.off()
 }
 
-long <- create_long_form(complete.task_scores)
+long <- create_long_form(task.scores)
 plot_scores(long)
