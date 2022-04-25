@@ -1,5 +1,6 @@
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 
+source("statistics/stat_funcs.R")
 source("statistics/recode.R")
 
 # Set global variables (constant)
@@ -47,30 +48,46 @@ moderation_analysis <- function(control, treatment, moderator, mod, task) {
   }
 }
 
-# Read files
-yesno_control_FE <- read.csv("eeg_processing/data/indices/yesno/indices_control_FE.csv")
-yesno_control_VB <- read.csv("eeg_processing/data/indices/yesno/indices_control_VB.csv")
-yesno_treatment_FE <- read.csv("eeg_processing/data/indices/yesno/indices_treatment_FE.csv")
-yesno_treatment_VB <- read.csv("eeg_processing/data/indices/yesno/indices_treatment_VB.csv")
+run_moderation <- function() {
+  eeg_data <- load_eeg()
+  
+  questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
+  recoded.questionnaire <- recode_questionnaire(questionnaire)
+  
+  scale.scores.FE <- scale_vars("FE")
+  scale.scores.VB <- scale_vars("VB")
+  
+  i <- 1
+  
+  while (i < length(eeg_data)) {
+    if (i <= 4) {
+      curr_task <- "yesno"
+    } else if (i > 4 & i <= 8) {
+      curr_task <- "open"
+    } else {
+      curr_task <- "cloze"
+    }
+    
+    if (i <= 2 | i == 5 | i == 6 | i == 9 | i == 10) {
+      curr_mod <- "FE"
+    } else {
+      curr_mod <- "VB"
+    }
+    
+    print(paste("[INFO] Processing", curr_task, curr_mod, sep = " "))
+    
+    control_data <- eeg_data[[i]]
+    treatment_data <- eeg_data[[i+1]]
+    
+    if (curr_mod == "FE") {
+      moderation_analysis(control_data, treatment_data, scale.scores.FE, curr_mod, curr_task)
+    } else if (curr_mod == "VB") {
+      moderation_analysis(control_data, treatment_data, scale.scores.VB, curr_mod, curr_task)
+    }
+    
+    
+    i <- i + 2
+  }
+}
 
-open_control_FE <- read.csv("eeg_processing/data/indices/open/indices_control_FE.csv")
-open_control_VB <- read.csv("eeg_processing/data/indices/open/indices_control_VB.csv")
-open_treatment_FE <- read.csv("eeg_processing/data/indices/open/indices_treatment_FE.csv")
-open_treatment_VB <- read.csv("eeg_processing/data/indices/open/indices_treatment_VB.csv")
-
-cloze_control_FE <- read.csv("eeg_processing/data/indices/cloze/indices_control_FE.csv")
-cloze_control_VB <- read.csv("eeg_processing/data/indices/cloze/indices_control_VB.csv")
-cloze_treatment_FE <- read.csv("eeg_processing/data/indices/cloze/indices_treatment_FE.csv")
-cloze_treatment_VB <- read.csv("eeg_processing/data/indices/cloze/indices_treatment_VB.csv")
-
-questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
-recoded.questionnaire <- recode_questionnaire(questionnaire)
-
-scale.scores.FE <- scale_vars("FE")
-scale.scores.VB <- scale_vars("VB")
-moderation_analysis(yesno_control_FE, yesno_treatment_FE, scale.scores.FE, "FE", "yesno")
-moderation_analysis(yesno_control_VB, yesno_treatment_VB, scale.scores.FE, "VB", "yesno")
-moderation_analysis(open_control_FE, open_treatment_FE, scale.scores.FE, "FE", "open")
-moderation_analysis(open_control_VB, open_treatment_VB, scale.scores.VB, "VB", "open")
-moderation_analysis(cloze_control_FE, cloze_treatment_FE, scale.scores.VB, "FE", "cloze")
-moderation_analysis(cloze_control_VB, cloze_treatment_VB, scale.scores.VB, "VB", "cloze")
+run_moderation()

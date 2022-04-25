@@ -32,9 +32,9 @@ create_long_form <- function(data) {
 }
 
 plot_scores <- function(data) {
-  yn_plot <- ggplot(data = data, aes(x = condition, y = yesno, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Yes no questions", fill = "Model") +
+  yn_plot <- ggplot(data = data) + 
+    geom_boxplot(aes(x = model, y = yesno, fill = condition)) +
+    labs(title = "Yes no questions") +
     xlab("Condition") + 
     ylab("Score")
   
@@ -42,9 +42,9 @@ plot_scores <- function(data) {
   print(yn_plot)
   dev.off()
   
-  opent_plot <- ggplot(data = data, aes(x = condition, y = open.total, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Problems-solving (total)", fill = "Model") +
+  opent_plot <- ggplot(data = data) + 
+    geom_boxplot(aes(x = model, y = open.total, fill = condition)) +
+    labs(title = "Problem-solving questions (total)") +
     xlab("Condition") + 
     ylab("Score")
   
@@ -52,9 +52,9 @@ plot_scores <- function(data) {
   print(opent_plot)
   dev.off()
   
-  openc_plot <- ggplot(data = data, aes(x = condition, y = open.correct, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Problems-solving (correct)", fill = "Model") +
+  openc_plot <- ggplot(data = data) + 
+    geom_boxplot(aes(x = model, y = open.correct, fill = condition)) +
+    labs(title = "Problem-solving questions (correct)") +
     xlab("Condition") + 
     ylab("Score")
   
@@ -62,9 +62,9 @@ plot_scores <- function(data) {
   print(openc_plot)
   dev.off()
   
-  cloze_plot <- ggplot(data = data, aes(x = condition, y = cloze, fill = model)) + 
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Cloze test", fill = "Model") +
+  cloze_plot <- ggplot(data = data) + 
+    geom_boxplot(aes(x = model, y = cloze, fill = condition)) +
+    labs(title = "Cloze test") +
     xlab("Condition") + 
     ylab("Score")
   
