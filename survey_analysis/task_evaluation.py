@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from load_data import import_survey
+from survey_funcs import import_survey, determine_condition
 
 N_SUBJ = 58
 DATA_LOC = 'survey_data.csv'
@@ -106,7 +106,7 @@ def check_yes_no(correct, answers):
 
     for i in range(len(correct['FE'])):
         if correct['FE'][i] == 'u':
-            scores['FE'].append(1)
+            continue
         elif answers['FE'][i].lower() == correct['FE'][i].lower():
             scores['FE'].append(1)
         else:
@@ -114,7 +114,7 @@ def check_yes_no(correct, answers):
 
     for i in range(len(correct['VB'])):
         if correct['VB'][i] == 'u':
-            scores['VB'].append(1)
+            continue
         elif answers['VB'][i].lower() == correct['VB'][i].lower():
             scores['VB'].append(1)
         else:
