@@ -1,8 +1,10 @@
 # Load libraries
 library(ggplot2)
 
-# Set working directory to /eeg_processing/ folder before starting!
-setwd("~/Nextcloud/Projects/cognitive-workload/eeg_processing")
+source("statistics/stat_funcs.R")
+
+# Set working directory
+setwd("~/Nextcloud/Projects/cognitive-workload/")
 
 # Set global variables (constant)
 NPARTS <- 58
@@ -50,7 +52,7 @@ check_assumptions <- function(control, treatment) {
 #' @param output Output folder
 #' 
 statistical_test <- function(control, treatment, norm_viol, task, mod) {
-  output_file = paste("results/statistics/statistical_tests/", mod, "-", task, "-", "result.txt", sep = "")
+  output_file = paste("eeg_processing/results/statistics/statistical_tests/", mod, "-", task, "-", "result.txt", sep = "")
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
   for (iChan in 1:NCHANS) {
@@ -80,7 +82,7 @@ statistical_test <- function(control, treatment, norm_viol, task, mod) {
 #' @param output Output folder
 #' 
 plot_data <- function(control, treatment, task, mod) {
-  output <- paste("results/plots/", task, "/", sep = "")
+  output <- paste("eeg_processing/results/plots/", task, "/", sep = "")
   # Create svg plot for each channel
   for (iChan in 1:NCHANS) {
     concat_data <- c(control[iChan], treatment[iChan])
@@ -134,62 +136,43 @@ time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
             legend.position = "none") + 
       scale_color_manual(values = c("seagreen2", "seagreen4", "deepskyblue2", "deepskyblue4"))
     
-    ggsave(paste("plots/time/chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
+    ggsave(paste("eeg_processing/plots/time/chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
   }
 }
 
-# Read files
-yesno_control_FE <- read.csv("data/indices/yesno/indices_control_FE.csv")
-yesno_control_VB <- read.csv("data/indices/yesno/indices_control_VB.csv")
-yesno_treatment_FE <- read.csv("data/indices/yesno/indices_treatment_FE.csv")
-yesno_treatment_VB <- read.csv("data/indices/yesno/indices_treatment_VB.csv")
+run <- function() {
+  eeg_data <- load_eeg()
+  
+  i <- 1
 
-open_control_FE <- read.csv("data/indices/open/indices_control_FE.csv")
-open_control_VB <- read.csv("data/indices/open/indices_control_VB.csv")
-open_treatment_FE <- read.csv("data/indices/open/indices_treatment_FE.csv")
-open_treatment_VB <- read.csv("data/indices/open/indices_treatment_VB.csv")
+  while (i < length(eeg_data)) {
+    print(i)
+    if (i <= 4) {
+      curr_task <- "yesno"
+    } else if (i > 4 & i <= 8) {
+      curr_task <- "open"
+    } else {
+      curr_task <- "cloze"
+    }
+    
+    if (i <= 2 | i == 5 | i == 6 | i == 9 | i == 10) {
+      curr_mod <- "FE"
+    } else{
+      curr_mod <- "VB"
+    }
+    
+    control_data <- eeg_data[[i]]
+    treatment_data <- eeg_data[[i+1]]
+    
+    norm_violated <- check_assumptions(control_data, treatment_data)
+    statistical_test(control_data, treatment_data, norm_violated, curr_task, curr_mod)
+    plot_data(control_data, treatment_data, curr_task, curr_mod)
+    
+    i <- i + 2
+  }
+}
 
-cloze_control_FE <- read.csv("data/indices/cloze/indices_control_FE.csv")
-cloze_control_VB <- read.csv("data/indices/cloze/indices_control_VB.csv")
-cloze_treatment_FE <- read.csv("data/indices/cloze/indices_treatment_FE.csv")
-cloze_treatment_VB <- read.csv("data/indices/cloze/indices_treatment_VB.csv")
-
-# Output folder
-output_dir = "results/statistics/statistical_tests/"
-curr_task = "yesno"
-curr_mod = "FE"
-
-# Call functions
-norm_violated = check_assumptions(yesno_control_FE, yesno_treatment_FE)
-statistical_test(yesno_control_FE, yesno_treatment_FE, norm_violated, curr_task, curr_mod)
-plot_data(yesno_control_FE, yesno_treatment_FE, curr_task, curr_mod)
-
-curr_mod = "VB"
-norm_violated = check_assumptions(yesno_control_VB, yesno_treatment_VB)
-statistical_test(yesno_control_VB, yesno_treatment_VB, norm_violated, curr_task, curr_mod)
-plot_data(yesno_control_VB, yesno_treatment_VB, curr_task, curr_mod)
-
-curr_task = "open"
-curr_mod = "FE"
-norm_violated = check_assumptions(open_control_FE, open_treatment_FE)
-statistical_test(open_control_FE, open_treatment_FE, norm_violated, curr_task, curr_mod)
-plot_data(open_control_FE, open_treatment_FE, curr_task, curr_mod)
-
-curr_mod = "VB"
-norm_violated = check_assumptions(open_control_VB, open_treatment_VB)
-statistical_test(open_control_VB, open_treatment_VB, norm_violated, curr_task, curr_mod)
-plot_data(open_control_VB, open_treatment_VB, curr_task, curr_mod)
-
-curr_task = "cloze"
-curr_mod = "FE"
-norm_violated <- check_assumptions(cloze_control_FE, cloze_treatment_FE)
-statistical_test(cloze_control_FE, cloze_treatment_FE, norm_violated, curr_task, curr_mod)
-plot_data(cloze_control_FE, cloze_treatment_FE, curr_task, curr_mod)
-
-curr_mod = "VB"
-norm_violated = check_assumptions(cloze_control_VB, cloze_treatment_VB)
-statistical_test(cloze_control_VB, cloze_treatment_VB, norm_violated, curr_task, curr_mod)
-plot_data(cloze_control_VB, cloze_treatment_VB, curr_task, curr_mod)
+run()
 
 # time_plots(yesno_control_FE, yesno_control_VB, yesno_treatment_FE, yesno_treatment_VB,
 #           open_control_FE, open_control_VB, open_treatment_FE, open_treatment_VB,

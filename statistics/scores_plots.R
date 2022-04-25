@@ -1,4 +1,4 @@
-setwd("~/Nextcloud/Projects/cognitive-workload/statistics/")
+setwd("~/Nextcloud/Projects/cognitive-workload/")
 
 library(ggplot2)
 
@@ -33,45 +33,46 @@ create_long_form <- function(data) {
 
 plot_scores <- function(data) {
   yn_plot <- ggplot(data = data, aes(x = condition, y = yesno, fill = model)) + 
-    geom_boxplot(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = "dodge") +
     labs(title = "Yes no questions", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
   
-  svg("plots/yesno-scores.svg")
+  svg("statistics/plots/yesno-scores.svg")
   print(yn_plot)
   dev.off()
   
   opent_plot <- ggplot(data = data, aes(x = condition, y = open.total, fill = model)) + 
-    geom_boxplot(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = "dodge") +
     labs(title = "Problems-solving (total)", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
   
-  svg("plots/open-total-scores.svg")
+  svg("statistics/plots/open-total-scores.svg")
   print(opent_plot)
   dev.off()
   
   openc_plot <- ggplot(data = data, aes(x = condition, y = open.correct, fill = model)) + 
-    geom_boxplot(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = "dodge") +
     labs(title = "Problems-solving (correct)", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
   
-  svg("plots/open-correct-scores.svg")
+  svg("statistics/plots/open-correct-scores.svg")
   print(openc_plot)
   dev.off()
   
   cloze_plot <- ggplot(data = data, aes(x = condition, y = cloze, fill = model)) + 
-    geom_boxplot(stat = "identity", position = "dodge") +
+    geom_bar(stat = "identity", position = "dodge") +
     labs(title = "Cloze test", fill = "Model") +
     xlab("Condition") + 
     ylab("Score")
   
-  svg("plots/cloze-scores.svg")
+  svg("statistics/plots/cloze-scores.svg")
   print(cloze_plot)
   dev.off()
 }
 
+task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 long <- create_long_form(task.scores)
 plot_scores(long)
