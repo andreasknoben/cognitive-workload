@@ -1,8 +1,8 @@
-setwd("~/Nextcloud/Projects/cognitive-workload/survey_analysis/")
+setwd("~/Nextcloud/Projects/cognitive-workload/")
 
 relative_scores <- function(scores) {
-  scores$FE.yesno.rel <- scores$FE.yesno / 12 # Change!!!
-  scores$VB.yesno.rel <- scores$VB.yesno / 12
+  scores$FE.yesno.rel <- scores$FE.yesno / 11
+  scores$VB.yesno.rel <- scores$VB.yesno / 10
   scores$FE.open.rel <- scores$FE.open.correct / scores$FE.open.total
   scores$VB.open.rel <- scores$VB.open.correct / scores$VB.open.total
   scores$FE.cloze.rel <- scores$FE.cloze / 45
@@ -31,7 +31,7 @@ statistical_test <- function(task, mod, taskstr) {
 }
 
 run_tests <- function(df) {
-  output_file = "results/statistical-test.txt"
+  output_file = "survey_analysis/results/statistical-test.txt"
   cat(paste("FE yes/no", toString(statistical_test(df$FE.yesno.rel)), sep = "\t"), file = output_file, sep = "\n", append = FALSE)
   cat(paste("VB yes/no", toString(statistical_test(df$VB.yesno.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
   cat(paste("FE open", toString(statistical_test(df$FE.open.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
@@ -40,6 +40,6 @@ run_tests <- function(df) {
   cat(paste("VB cloze", toString(statistical_test(df$VB.cloze.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
 }
 
-task.scores <- read.csv("extracted/complete-task_scores.csv")
+task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 task.scores <- relative_scores(task.scores)
 run_tests(task.scores)
