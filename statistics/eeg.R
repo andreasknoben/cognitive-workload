@@ -59,7 +59,7 @@ statistical_test <- function(control, treatment, norm_viol, task, mod) {
     concat_data <- c(control[iChan], treatment[iChan])
     test_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS/2),
                             indices = unlist(concat_data))
-
+    
     if (CHANS[iChan] %in% norm_viol) {
       test <- wilcox.test(indices ~ condition, data = test_data, na.action = "na.omit", conf.int = TRUE)
     } else {
@@ -146,7 +146,6 @@ run <- function() {
   i <- 1
 
   while (i < length(eeg_data)) {
-    print(i)
     if (i <= 4) {
       curr_task <- "yesno"
     } else if (i > 4 & i <= 8) {
@@ -157,9 +156,11 @@ run <- function() {
     
     if (i <= 2 | i == 5 | i == 6 | i == 9 | i == 10) {
       curr_mod <- "FE"
-    } else{
+    } else {
       curr_mod <- "VB"
     }
+    
+    print(paste("[INFO] Processing", curr_task, curr_mod, sep = " "))
     
     control_data <- eeg_data[[i]]
     treatment_data <- eeg_data[[i+1]]
