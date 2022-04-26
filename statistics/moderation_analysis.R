@@ -57,6 +57,8 @@ run_moderation <- function() {
   scale.scores.FE <- scale_vars("FE")
   scale.scores.VB <- scale_vars("VB")
   
+  View(scale.scores.FE)
+  
   i <- 1
   
   while (i < length(eeg_data)) {
