@@ -6,11 +6,6 @@ source("statistics/stat_funcs.R")
 # Set working directory
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 
-# Set global variables (constant)
-NPARTS <- 58
-NCHANS <- 16
-CHANS <- c('Fp1', 'Fp2', 'F3', 'Fz', 'F4', 'T7', 'C3', 'Cz', 'C4', 'T8', 'P3', 'Pz', 'P4', 'PO7', 'PO8', 'Oz')
-
 
 #' Check the data for normality
 #'

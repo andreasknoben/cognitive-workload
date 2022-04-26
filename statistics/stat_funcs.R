@@ -1,3 +1,8 @@
+# Set global variables (constant)
+NPARTS <- 58
+NCHANS <- 16
+CHANS <- c('Fp1', 'Fp2', 'F3', 'Fz', 'F4', 'T7', 'C3', 'Cz', 'C4', 'T8', 'P3', 'Pz', 'P4', 'PO7', 'PO8', 'Oz')
+
 load_eeg <- function() {
   yesno_control_FE <- read.csv("eeg_processing/data/indices/yesno/indices_control_FE.csv")
   yesno_control_VB <- read.csv("eeg_processing/data/indices/yesno/indices_control_VB.csv")
@@ -22,4 +27,15 @@ load_eeg <- function() {
                    cloze_control_VB, cloze_treatment_VB)
   
   return(eeg_data)
+}
+
+relative_scores <- function(scores) {
+  scores$FE.yesno.rel <- scores$FE.yesno / 11
+  scores$VB.yesno.rel <- scores$VB.yesno / 10
+  scores$FE.open.rel <- scores$FE.open.correct / scores$FE.open.total
+  scores$VB.open.rel <- scores$VB.open.correct / scores$VB.open.total
+  scores$FE.cloze.rel <- scores$FE.cloze / 45
+  scores$VB.cloze.rel <- scores$VB.cloze / 45
+  
+  return(scores)
 }

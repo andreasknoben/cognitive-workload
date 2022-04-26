@@ -86,7 +86,6 @@ relative_scores <- function(scores) {
 
 normality <- function(data) {
   test <- shapiro.test(data)
-  print(test)
   if (test$p.value < 0.05) {
     return(0)
   } else {
