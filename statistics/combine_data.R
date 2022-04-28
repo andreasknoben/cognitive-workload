@@ -1,5 +1,13 @@
+# Set working directory to root of project folder
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 
+
+#' Create a list of EEG dataframes
+#' 
+#' Loads the CSV files containing the EEG Engagement Indices from a list of
+#' file names, and adds the imported dataframes together in a list
+#' @return Returns a list with all the EEG Engagement Indices dataframes
+#' 
 eeg_data <- function() {
   yesno <- list.files("eeg_processing/data/indices/yesno", full.names = TRUE)
   open <- list.files("eeg_processing/data/indices/open", full.names = TRUE)
@@ -15,6 +23,12 @@ eeg_data <- function() {
   return(eeg)
 }
 
+
+#' Parses the order variable such that FE first gets a 1, VB first gets a zero
+#' 
+#' @param order The original vector with the order variable
+#' @return Returns a vector with 1s where FE is first; 0s where VB is first
+#' 
 parse_order <- function(order) {
   first <- substr(order, 3, 4)
   first[first == "FE"] <- 1
@@ -22,6 +36,12 @@ parse_order <- function(order) {
   return(first)
 }
 
+
+#' Generates the column names for the final dataframe
+#' 
+#' Generates column names with all combinations of models, tasks, and channels
+#' @return Returns a vector with the column names
+#' 
 generate_eeg_colnames <- function() {
   mods <- c("fe", "vb")
   tasks <- c("yesno", "open", "cloze")
@@ -41,6 +61,14 @@ generate_eeg_colnames <- function() {
   return(colnames)
 }
 
+
+#' Creates a dataframe in wide format of all supplied data
+#' 
+#' @param eeg The EEG Engagement Indices dataframes list
+#' @param scores The dataframe containing the scores on the tasks
+#' @param question The dataframe containing the other questionnaire answers
+#' @return Returns the dataframe containing all data in wide format
+#' 
 create_wide_data <- function(eeg, scores, question) {
   df <- data.frame(subj = c(1:58),
                    condition = scores$condition,
@@ -75,9 +103,11 @@ create_wide_data <- function(eeg, scores, question) {
   return(df)
 }
 
+# Load all data files: EEG Engagement Indices, task scores, questionnaire answers
 eeg.index <- eeg_data()
 task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
 
+# Create complete data and write to CSV
 complete.data <- create_wide_data(eeg.index, task.scores, questionnaire)
 write.csv(complete.data, "statistics/complete-data/complete-data.csv", row.names = FALSE)
