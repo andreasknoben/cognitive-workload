@@ -1,4 +1,5 @@
 library("ggplot2")
+library("dplyr")
 
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 
@@ -14,6 +15,15 @@ plot_correlation <- function(df, mod, task, chan) {
   ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 7, height = 5)
 }
 
+calc_correlation <- function(df, mod, task, chan) {
+  View(df)
+  out <- capture.output(df %>%
+                          group_by(condition) %>%
+                          summarize(r = cor(index, score, use = "complete.obs")))
+  
+  return(out)
+}
+
 run_correlation <- function(data) {
   task_scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
   task_scores <- relative_scores(task_scores)
@@ -24,6 +34,8 @@ run_correlation <- function(data) {
   for (task in tasks) {
     for (mod in mods) {
        scores_colname <- paste(toupper(mod), task, "rel", sep = ".")
+       output_file = paste("statistics/tests/correlation-eegscores/", mod, "-", task, "-", "result.txt", sep = "")
+       cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
        for (iChan in 1:NCHANS) {
          ch <- CHANS[iChan]
          eeg_colname <- paste("eeg", ch, mod, task, sep = ".")
@@ -31,6 +43,11 @@ run_correlation <- function(data) {
          plotdata <- data.frame(condition = data$condition,
                                 index = data[,eeg_colname],
                                 score = task_scores[,scores_colname])
+         
+         corr <- calc_correlation(plotdata, mod, task, ch)
+         cat(CHANS[iChan], file = output_file, append = TRUE, sep = "")
+         cat(": \t", file = output_file, append = TRUE, sep = "")
+         cat(corr, file = output_file, append = TRUE, sep = "\n")
          
          plot_correlation(plotdata, mod, task, ch)
        }
