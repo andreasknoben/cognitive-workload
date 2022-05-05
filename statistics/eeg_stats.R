@@ -1,11 +1,6 @@
-# Load libraries
-library(ggplot2)
-
-source("statistics/stat_funcs.R")
-
-# Set working directory
+# Set working directory and load helper file with libraries, functions
 setwd("~/Nextcloud/Projects/cognitive-workload/")
-
+source("statistics/stat_funcs.R")
 
 #' Check the data for normality
 #'
@@ -18,16 +13,16 @@ setwd("~/Nextcloud/Projects/cognitive-workload/")
 check_assumptions <- function(control, treatment) {
   norm_viol <- vector()
 
-  for(iChan in 1:NCHANS) {
+  for (iChan in 1:NCHANS) {
     control_data <- control[iChan][!is.na(control[iChan])]
     shapiro_test <- shapiro.test(control_data)
-    if(shapiro_test$p.value < 0.05) {
+    if (shapiro_test$p.value < 0.05) {
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
     
     treatment_data <- treatment[iChan][!is.na(treatment[iChan])]
     shapiro_test <- shapiro.test(treatment_data)
-    if(shapiro_test$p.value < 0.05) {
+    if (shapiro_test$p.value < 0.05) {
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
   }
@@ -48,7 +43,7 @@ check_assumptions <- function(control, treatment) {
 #' 
 statistical_test <- function(control, treatment, norm_viol, task, mod) {
   output_file = paste("eeg_processing/results/statistics/statistical_tests/", mod, "-", task, "-", "result.txt", sep = "")
-  cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
+  cat(paste("Statistics generated at", Sys.time(), sep = " "), file = output_file, append = FALSE, sep = "\n")
   
   for (iChan in 1:NCHANS) {
     concat_data <- c(control[iChan], treatment[iChan])
@@ -56,7 +51,7 @@ statistical_test <- function(control, treatment, norm_viol, task, mod) {
                             indices = unlist(concat_data))
     
     if (CHANS[iChan] %in% norm_viol) {
-      test <- wilcox.test(indices ~ condition, data = test_data, na.action = "na.omit", conf.int = TRUE)
+      test <- wilcox.test(indices ~ condition, data = test_data, na.action = "na.omit")
     } else {
       test <- t.test(indices ~ condition, data = test_data, var.equal = FALSE, na.action = "na.omit")
     }
@@ -72,30 +67,35 @@ statistical_test <- function(control, treatment, norm_viol, task, mod) {
 #'
 #' For each channel, it creates a boxplot showing the control and treatment groups.
 #' It saves these plots in the target folder.
-#' @param control The vector with control data
-#' @param treatment The vector with treatment data
-#' @param output Output folder
+#' @param control_fe The vector with control FE data
+#' @param treatment The vector with treatment FE data
+#' @param control_vb The vector with control VB data
+#' @param treatment_vb The vector with treatment VB data
+#' @param task String indicating the task to be processed
 #' 
-plot_data <- function(control, treatment, task, mod) {
-  output <- paste("eeg_processing/results/plots/", task, "/", sep = "")
+plot_data <- function(control_fe, treatment_fe, control_vb, treatment_vb, task) {
+  # Create string with target output folder
+  output_loc <- paste("eeg_processing/results/plots/", task, "/", sep = "")
+  
   # Create svg plot for each channel
   for (iChan in 1:NCHANS) {
-    concat_data <- c(control[iChan], treatment[iChan])
-    plt_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS/2),
+    concat_data <- c(control_fe[iChan], control_vb[iChan], treatment_fe[iChan], treatment_vb[iChan])
+    plt_data <- data.frame(condition = rep(c("control", "treatment"), each = NPARTS),
+                           model = rep(c("FE", "VB", "FE", "VB"), each = NPARTS/2),
                            indices = unlist(concat_data))
     
     plot <- ggplot(data = na.omit(plt_data)) +
-      geom_boxplot(aes(x = condition, y = indices),
-                   fill = c("#458aff", "#009E73")) +
+      geom_boxplot(aes(x = condition, y = indices, fill = model), width = 0.8) +
       labs(title = CHANS[iChan]) +
       theme(axis.title.x = element_blank(),
             axis.title.y = element_blank(),
             axis.text.x = element_blank(),
             axis.ticks.x = element_blank(),
-            axis.text.y = element_text(size = 20),
-            plot.title = element_text(size = 28, hjust = 0.5))
+            axis.text.y = element_text(size = 18),
+            plot.title = element_text(size = 26, hjust = 0.5),
+            legend.position = "none")
     
-    ggsave(paste(output, mod, "-chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
+    ggsave(paste(output_loc, "chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 5, height = 5)
   }
 }
 
@@ -104,18 +104,17 @@ plot_data <- function(control, treatment, task, mod) {
 #' 
 #' Generates a plot for each channel with the course of the EEG Engagement Index
 #' for each condition and model combination.
-#' @param yn|open|cloze_c|t_FE|VB Data for a task/condition/model
-time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
-                       open_c_FE, open_c_VB, open_t_FE, open_t_VB,
-                       cloze_c_FE, cloze_c_VB, cloze_t_FE, cloze_t_VB) {
+#' @param eeg A list containing all EEG dataframes.
+#' 
+time_plots <- function(eeg) {
   for (iChan in 1:NCHANS) {
     # Plot mean for yesno, open, cloze
     plt_data <- data.frame(condition = rep(c("Control FE", "Control VB", "Treatment FE", "Treatment VB"), each = 3),
                            task = factor(rep(c("Yes/no", "Problem-solving", "Cloze"), times = 4), levels = c("Yes/no", "Problem-solving", "Cloze")),
-                           index = c(mean(unlist(yn_c_FE[iChan]), na.rm = TRUE), mean(unlist(open_c_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_c_FE[iChan]), na.rm = TRUE),
-                                     mean(unlist(yn_c_VB[iChan]), na.rm = TRUE), mean(unlist(open_c_VB[iChan]), na.rm = TRUE), mean(unlist(cloze_c_VB[iChan]), na.rm = TRUE),
-                                     mean(unlist(yn_t_FE[iChan]), na.rm = TRUE), mean(unlist(open_t_FE[iChan]), na.rm = TRUE), mean(unlist(cloze_t_FE[iChan]), na.rm = TRUE),
-                                     mean(unlist(yn_t_VB[iChan]), na.rm = TRUE), mean(unlist(open_t_VB[iChan]), na.rm = TRUE), mean(unlist(open_t_VB[iChan]), na.rm = TRUE)))
+                           index = c(mean(unlist(eeg[[1]][iChan]), na.rm = TRUE), mean(unlist(eeg[[5]][iChan]), na.rm = TRUE), mean(unlist(eeg[[9]][iChan]), na.rm = TRUE),
+                                     mean(unlist(eeg[[2]][iChan]), na.rm = TRUE), mean(unlist(eeg[[6]][iChan]), na.rm = TRUE), mean(unlist(eeg[[10]][iChan]), na.rm = TRUE),
+                                     mean(unlist(eeg[[3]][iChan]), na.rm = TRUE), mean(unlist(eeg[[7]][iChan]), na.rm = TRUE), mean(unlist(eeg[[11]][iChan]), na.rm = TRUE),
+                                     mean(unlist(eeg[[4]][iChan]), na.rm = TRUE), mean(unlist(eeg[[8]][iChan]), na.rm = TRUE), mean(unlist(eeg[[12]][iChan]), na.rm = TRUE)))
     
     plot <- ggplot(data = plt_data, aes(x = task, y = index, group = condition, color = condition)) +
       geom_point() + 
@@ -131,45 +130,35 @@ time_plots <- function(yn_c_FE, yn_c_VB, yn_t_FE, yn_t_VB,
             legend.position = "none") + 
       scale_color_manual(values = c("seagreen2", "seagreen4", "deepskyblue2", "deepskyblue4"))
     
-    ggsave(paste("eeg_processing/plots/time/chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
+    ggsave(paste("eeg_processing/results/plots/time/chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 3.25, height = 3.75)
   }
 }
 
+
+#' Runs the EEG statistics with the correct data
+#' 
 run <- function() {
   eeg_data <- load_eeg()
+  tasks <- c("yesno", "open", "cloze")
   
-  i <- 1
+  time_plots(eeg_data)
 
-  while (i < length(eeg_data)) {
-    if (i <= 4) {
-      curr_task <- "yesno"
-    } else if (i > 4 & i <= 8) {
-      curr_task <- "open"
-    } else {
-      curr_task <- "cloze"
-    }
+  for (i in 1:length(tasks)) {
+    listidx <- i + (i-1) * 3
+    curr_task <- tasks[i]
+    control_fe <- eeg_data[[listidx]]
+    control_vb <- eeg_data[[listidx+2]]
+    treatment_fe <- eeg_data[[listidx+1]]
+    treatment_vb <- eeg_data[[listidx+3]]
     
-    if (i <= 2 | i == 5 | i == 6 | i == 9 | i == 10) {
-      curr_mod <- "FE"
-    } else {
-      curr_mod <- "VB"
-    }
+    norm_violated <- check_assumptions(control_fe, treatment_fe)
+    statistical_test(control_fe, treatment_fe, norm_violated, curr_task, "FE")
     
-    print(paste("[INFO] Processing", curr_task, curr_mod, sep = " "))
+    norm_violated <- check_assumptions(control_vb, treatment_vb)
+    statistical_test(control_vb, treatment_vb, norm_violated, curr_task, "VB")
     
-    control_data <- eeg_data[[i]]
-    treatment_data <- eeg_data[[i+1]]
-    
-    norm_violated <- check_assumptions(control_data, treatment_data)
-    statistical_test(control_data, treatment_data, norm_violated, curr_task, curr_mod)
-    plot_data(control_data, treatment_data, curr_task, curr_mod)
-    
-    i <- i + 2
+    plot_data(control_fe, treatment_fe, control_vb, treatment_vb, curr_task)
   }
 }
 
 run()
-
-# time_plots(yesno_control_FE, yesno_control_VB, yesno_treatment_FE, yesno_treatment_VB,
-#           open_control_FE, open_control_VB, open_treatment_FE, open_treatment_VB,
-#           cloze_control_FE, cloze_control_VB, cloze_treatment_FE, cloze_treatment_VB)

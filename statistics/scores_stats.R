@@ -1,7 +1,16 @@
-library(ggplot2)
-
+# Set working directory and load helper file with libraries, functions
 setwd("~/Nextcloud/Projects/cognitive-workload/")
+source("statistics/stat_funcs.R")
 
+
+#' Creates a scores vector to get the scores in long format
+#' 
+#' Loops over all participants times two (since there are two scores, FE and VB for each),
+#' and correctly assigns the FE and VB scores
+#' @param fe_data Vector with the FE scores
+#' @param vb_data Vector with the VB scores
+#' @return Returns a vector containing the scores in long format
+#' 
 create_long_scores <- function(fe_data, vb_data) {
   long_scores <- vector(length = 116)
   j <- 1
@@ -19,8 +28,15 @@ create_long_scores <- function(fe_data, vb_data) {
   return(long_scores)
 }
 
+
+#' Converts the wide data provided into long format
+#' 
+#' Takes the scores data and makes sure it is entirely converted into long format,
+#' to be used by statistical tests.
+#' @param data Dataframe of scores data
+#' @return Returns the scores data in long format, as a dataframe
+#' 
 create_long_form <- function(data) {
-  
   long_df <- data.frame(part = rep(data$X, each = 2),
                         condition = rep(data$condition, each = 2),
                         model = rep(c("FE", "VB"), times = 58),
@@ -31,6 +47,11 @@ create_long_form <- function(data) {
   return(long_df)
 }
 
+
+#' Plots the scores obtained for each task and model
+#' 
+#' @param data The dataframe with the scores in long format
+#' 
 plot_scores <- function(data) {
   yn_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = yesno, fill = condition)) +
@@ -38,9 +59,7 @@ plot_scores <- function(data) {
     xlab("Condition") + 
     ylab("Score")
   
-  svg("statistics/plots/yesno-scores.svg")
-  print(yn_plot)
-  dev.off()
+  ggsave("statistics/plots/yesno-scores.svg", plot = yn_plot, width = 10, height = 8)
   
   opent_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.total, fill = condition)) +
@@ -48,9 +67,7 @@ plot_scores <- function(data) {
     xlab("Condition") + 
     ylab("Score")
   
-  svg("statistics/plots/open-total-scores.svg")
-  print(opent_plot)
-  dev.off()
+  ggsave("statistics/plots/open-total-scores.svg", plot = opent_plot, width = 10, height = 8)
   
   openc_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.correct, fill = condition)) +
@@ -58,9 +75,7 @@ plot_scores <- function(data) {
     xlab("Condition") + 
     ylab("Score")
   
-  svg("statistics/plots/open-correct-scores.svg")
-  print(openc_plot)
-  dev.off()
+  ggsave("statistics/plots/open-total-scores.svg", plot = openc_plot, width = 10, height = 8)
   
   cloze_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = cloze, fill = condition)) +
@@ -68,22 +83,17 @@ plot_scores <- function(data) {
     xlab("Condition") + 
     ylab("Score")
   
-  svg("statistics/plots/cloze-scores.svg")
-  print(cloze_plot)
-  dev.off()
+  ggsave("statistics/plots/open-total-scores.svg", plot = cloze_plot, width = 10, height = 8)
 }
 
-relative_scores <- function(scores) {
-  scores$FE.yesno.rel <- scores$FE.yesno / 11
-  scores$VB.yesno.rel <- scores$VB.yesno / 10
-  scores$FE.open.rel <- scores$FE.open.correct / scores$FE.open.total
-  scores$VB.open.rel <- scores$VB.open.correct / scores$VB.open.total
-  scores$FE.cloze.rel <- scores$FE.cloze / 45
-  scores$VB.cloze.rel <- scores$VB.cloze / 45
-  
-  return(scores)
-}
 
+#' Tests the supplied data for normality using the Shapiro-Wilk test
+#' 
+#' If the data is not normally distributed, returns 0
+#' If the data is normally distributed, returns 1
+#' @param data The data to be tested for normality (a vector)
+#' @return Returns a 0 (not normal) or a 1 (normal)
+#' 
 normality <- function(data) {
   test <- shapiro.test(data)
   if (test$p.value < 0.05) {
@@ -93,7 +103,15 @@ normality <- function(data) {
   }
 }
 
-statistical_test <- function(task, mod, taskstr) {
+
+#' Runs a statistical test on the provided task scores
+#' 
+#' If the normality is not violated, it runs a two-sided Welch's t-test,
+#' if it is violated, it runs a Mann-Whitney U test - both of condition on scores.
+#' @param task The task scores (vector)
+#' @return Returns the statistical test that was run
+#'
+statistical_test <- function(task) {
   if (normality(task) == 1) {
     test <- t.test(task ~ task.scores$condition, var.equal = FALSE)
   } else {
@@ -102,6 +120,12 @@ statistical_test <- function(task, mod, taskstr) {
   return(test)
 }
 
+
+#' Does the function calls to run the statistical tests with the correct data
+#' and writes the tests to files.
+#' 
+#' @param df The dataframe with all relative scores data
+#' 
 run_tests <- function(df) {
   output_file = "survey_analysis/results/statistical-test.txt"
   cat(paste("FE yes/no", toString(statistical_test(df$FE.yesno.rel)), sep = "\t"), file = output_file, sep = "\n", append = FALSE)
@@ -112,9 +136,13 @@ run_tests <- function(df) {
   cat(paste("VB cloze", toString(statistical_test(df$VB.cloze.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
 }
 
+# Load the data and create long data
 task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 long <- create_long_form(task.scores)
+
+# Plot the long data
 plot_scores(long)
 
+# Compute relative scores and perform statistical tests
 task.scores <- relative_scores(task.scores)
 run_tests(task.scores)

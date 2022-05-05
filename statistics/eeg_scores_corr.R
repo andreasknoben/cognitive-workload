@@ -1,27 +1,37 @@
-library("ggplot2")
-library("dplyr")
-
-setwd("~/Nextcloud/Projects/cognitive-workload/")
-
+# Load helper file with libraries, functions, and working directory setting
 source("statistics/stat_funcs.R")
 
+
+#' 
 plot_correlation <- function(df, mod, task, chan) {
-  output <- paste("statistics/plots/correlation/", "/", sep = "")
+  output <- paste("statistics/plots/correlation/", task, "/", sep = "")
   
   plot <- ggplot(data = na.omit(df), aes(x = score, y = index, color = factor(condition))) + 
     geom_point() + 
-    geom_smooth(method = "lm", se = FALSE)
+    geom_smooth(method = "lm", se = FALSE) +
+    theme(legend.position = "none")
   
-  ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 7, height = 5)
+  ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 3.25, height = 3.75)
 }
 
-calc_correlation <- function(df, mod, task, chan) {
-  View(df)
-  out <- capture.output(df %>%
-                          group_by(condition) %>%
-                          summarize(r = cor(index, score, use = "complete.obs")))
+calc_correlation <- function(df, scores, mod, task, chan) {
+  output_file = paste("statistics/tests/correlation-eegscores/", mod, "-", task, "-", "result.txt", sep = "")
+  cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
-  return(out)
+  outcome <- scores
+  predictors <- vector(length = NCHANS)
+  for (i in 1:NCHANS) {
+    name <- paste("eeg", CHANS[i], mod, task, sep = ".")
+    predictors[i] <- name
+  }
+  
+  frml <- paste("scores ~ ", paste(predictors, collapse = " + "), sep = "")
+  frml <- as.formula(frml)
+  
+  model <- lm(formula = frml, data = df)
+  output <- capture.output(summary(model))
+  cat(output, file = output_file, append = TRUE, sep = "\n")
+  return(model)
 }
 
 run_correlation <- function(data) {
@@ -34,8 +44,8 @@ run_correlation <- function(data) {
   for (task in tasks) {
     for (mod in mods) {
        scores_colname <- paste(toupper(mod), task, "rel", sep = ".")
-       output_file = paste("statistics/tests/correlation-eegscores/", mod, "-", task, "-", "result.txt", sep = "")
-       cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
+       corr <- calc_correlation(data, task_scores[,scores_colname], mod, task)
+       
        for (iChan in 1:NCHANS) {
          ch <- CHANS[iChan]
          eeg_colname <- paste("eeg", ch, mod, task, sep = ".")
@@ -43,11 +53,6 @@ run_correlation <- function(data) {
          plotdata <- data.frame(condition = data$condition,
                                 index = data[,eeg_colname],
                                 score = task_scores[,scores_colname])
-         
-         corr <- calc_correlation(plotdata, mod, task, ch)
-         cat(CHANS[iChan], file = output_file, append = TRUE, sep = "")
-         cat(": \t", file = output_file, append = TRUE, sep = "")
-         cat(corr, file = output_file, append = TRUE, sep = "\n")
          
          plot_correlation(plotdata, mod, task, ch)
        }
