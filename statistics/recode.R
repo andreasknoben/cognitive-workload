@@ -1,12 +1,28 @@
-library(dplyr)
+# Set working directory and load helper file with libraries, functions
+setwd("~/Nextcloud/Projects/cognitive-workload/")
+source("statistics/stat_funcs.R")
 
-questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
+
+#' Recodes a column with yes/no answers
+#' 
+#' Codes a No to 0, and a Yes to 1
+#' @param col Vector to be recoded
+#' @return Vector of recoded values
 
 recode_yesno <- function(col) {
   recoded_col <- recode(col, No = 0, Yes = 1)
   return(recoded_col)
 }
 
+
+#' Recodes a column representing a Likert scale question
+#' 
+#' Can provide term "high" for a very low-very high scale
+#' Can provide term "agree" for a strongly disagree-strongly agree scale
+#' @param col Vector to be recoded
+#' @param term The type of Likert scale "semantic-wise"
+#' @return Vector of recoded values
+#'
 recode_likert <- function(col, term) {
   if (term == "high") {
     recoded_col <- recode(col, 'Very low' = 1, 'Low' = 2, 'Somewhat low' = 3, 'Neither low nor high' = 4,
@@ -19,6 +35,12 @@ recode_likert <- function(col, term) {
   return(recoded_col)
 }
 
+
+#' Constructs the fully recoded questionnaire and makes it into a dataframe
+#' 
+#' @param qdf Original dataframe of the questionnaire answers
+#' @return Returns the recoded questionnaire dataframe
+#'
 recode_questionnaire <- function(qdf) {
   recoded <- data.frame(age = qdf$age)
   recoded$gender <- recode(qdf$gender, Female = 0, Male = 1)
@@ -48,4 +70,6 @@ recode_questionnaire <- function(qdf) {
   return(recoded)
 }
 
+# Load file and recode
+questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
 recoded.questionnaire <- recode_questionnaire(questionnaire)

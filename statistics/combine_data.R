@@ -1,5 +1,5 @@
-# Set working directory to root of project folder
-setwd("~/Nextcloud/Projects/cognitive-workload/")
+# Load helper file with libraries, functions, and working directory setting
+source("statistics/stat_funcs.R")
 
 
 #' Create a list of EEG dataframes
@@ -8,11 +8,13 @@ setwd("~/Nextcloud/Projects/cognitive-workload/")
 #' file names, and adds the imported dataframes together in a list
 #' @return Returns a list with all the EEG Engagement Indices dataframes
 #' 
-eeg_data <- function() {
+load_eeg_data <- function() {
+  # Create file lists
   yesno <- list.files("eeg_processing/data/indices/yesno", full.names = TRUE)
   open <- list.files("eeg_processing/data/indices/open", full.names = TRUE)
   cloze <- list.files("eeg_processing/data/indices/cloze", full.names = TRUE)
   
+  # Add all data in list into one dataframe "eeg"
   eeg <- sapply(yesno, read.csv, simplify = FALSE, USE.NAMES = TRUE)
   eeg <- append(eeg, sapply(open, read.csv, simplify = FALSE, USE.NAMES = TRUE))
   eeg <- append(eeg, sapply(cloze, read.csv, simplify = FALSE, USE.NAMES = TRUE))
@@ -53,8 +55,8 @@ generate_eeg_colnames <- function() {
     for (task in tasks) {
       for (chan in chans) {
         colname <- paste("eeg", chan, mod, task, sep = ".")
-        colnames[i] = colname
-        i = i + 1
+        colnames[i] <- colname
+        i <- i + 1
       }
     }
   }
@@ -72,7 +74,7 @@ generate_eeg_colnames <- function() {
 create_wide_data <- function(eeg, scores, question) {
   df <- data.frame(subj = c(1:58),
                    condition = scores$condition,
-                   fe.first = parse_order(scores$order),
+                   fe_first = parse_order(scores$order),
                    age = question$age,
                    gender = question$gender)
   
@@ -87,10 +89,10 @@ create_wide_data <- function(eeg, scores, question) {
   for (i in 1:nrow(df)) {
     if (df[i, "condition"] == "control") {
       df[i, eeg_colnames] <- eeg_control[iControl,]
-      iControl = iControl + 1
+      iControl <- iControl + 1
     } else {
       df[i, eeg_colnames] <- eeg_treatment[iTreatment,]
-      iTreatment = iTreatment + 1
+      iTreatment <- iTreatment + 1
     }
   }
 
@@ -104,10 +106,10 @@ create_wide_data <- function(eeg, scores, question) {
 }
 
 # Load all data files: EEG Engagement Indices, task scores, questionnaire answers
-eeg.index <- eeg_data()
-task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
+eeg_index <- load_eeg_data()
+task_scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
 questionnaire <- read.csv("survey_analysis/extracted/questionnaire-answers.csv")
 
 # Create complete data and write to CSV
-complete.data <- create_wide_data(eeg.index, task.scores, questionnaire)
-write.csv(complete.data, "statistics/complete-data/complete-data.csv", row.names = FALSE)
+complete_data <- create_wide_data(eeg.index, task.scores, questionnaire)
+write.csv(complete_data, "statistics/complete-data/complete-data.csv", row.names = FALSE)

@@ -221,15 +221,19 @@ def write_scores(data, scores_df, yncorrect):
 
         scores_df.to_csv('extracted/task-scores.csv')
 
+# Load data
 data = import_survey(DATA_LOC, N_SUBJ)
 
+# Construct correct answers
 yes_no_correct = construct_yes_no_correct()
 cloze_correct = construct_cloze_correct()
 
+# Create empty dataframes to store the extracted answers and the scores
 results = pd.DataFrame(columns = ['condition', 'order', 'FE.yesno', 'FE.open', 'FE.cloze',
                                   'VB.yesno', 'VB.open', 'VB.open' 'VB.cloze'], index = range(1, N_SUBJ+1))
 scores = pd.DataFrame(columns = ['condition', 'order', 'FE.yesno', 'FE.open.total', 'FE.open.correct', 'FE.cloze',
                                  'VB.yesno', 'VB.open.total', 'VB.open.correct', 'VB.cloze'], index = range(1, N_SUBJ+1))
 
+# Write extracted results and scores into dataframes and into their respective CSV files
 write_results(data, results, yes_no_correct, cloze_correct)
 write_scores(data, scores, yes_no_correct)

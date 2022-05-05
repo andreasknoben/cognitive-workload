@@ -40,6 +40,15 @@ def save_cols(target_df, g, *colnames):
     return target_df
 
 def process_nasatlx(df):
+    '''
+    Processes the NASA-TLX columns and creates a new dataframe with the data. It handles the missing data.
+
+        Parameters:
+            df (pd.DataFrame): pandas dataframe with the original data
+
+        Returns:
+            nasatlx (pd.DataFrame): pandas dataframe with the NASA-TLX data
+    '''
     nasatlx_colnames = ["fe.nasatlx.1", "fe.nasatlx.2", "fe.nasatlx.3", "fe.nasatlx.4", "fe.nasatlx.5", "vb.nasatlx.1", "vb.nasatlx.2", "vb.nasatlx.3", "vb.nasatlx.4", "vb.nasatlx.5"]
     nasatlx = pd.DataFrame(columns = nasatlx_colnames)
 
@@ -84,5 +93,6 @@ def write_output(data):
 
     output.to_csv('extracted/questionnaire-answers.csv')
 
+# Load data and run functions
 data = import_survey(DATA_LOC, N_SUBJ)
 write_output(data)
