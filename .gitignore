@@ -1,6 +1,17 @@
+.RData
 .Rhistory
 eeg_processing/data
 eeg_processing/results
+eeg_processing/.RData
+eeg_processing/.Rhistory
+statistics/complete-data
+statistics/plots
+statistics/tests
+statistics/.RData
+statistics/.Rhistory
 survey_analysis/__pycache__
 survey_analysis/extracted
+survey_analysis/results
+survey_analysis/.RData
+survey_analysis/.Rhistory
 survey_analysis/survey_data.csv
