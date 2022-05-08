@@ -49,7 +49,7 @@ The `scores_stats.R` file aims to compare the task scores between the LOEM and H
 ### stat_funcs.R
 The `stat_funcs.R` file contains a few functions that are used by multiple R files. The `load_eeg()` function loads the EEG files and creates a list of dataframes. The `relative_scores()` function creates relative scores out of the original task scores.
 
-## Survey Analysis
+## Survey analysis
 The `survey-analysis` folder contains the code that allows to check the questions automatically for as much as possible.
 
 ### answers
