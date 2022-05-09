@@ -57,33 +57,37 @@ plot_scores <- function(data) {
     geom_boxplot(aes(x = model, y = yesno, fill = condition)) +
     labs(title = "Yes no questions") +
     xlab("Condition") + 
-    ylab("Score")
+    ylab("Score") + 
+    theme(plot.title = element_text(size = 18))
   
-  ggsave("statistics/plots/yesno-scores.svg", plot = yn_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/yesno-scores.svg", plot = yn_plot, width = 10, height = 8)
   
   opent_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.total, fill = condition)) +
     labs(title = "Problem-solving questions (total)") +
     xlab("Condition") + 
-    ylab("Score")
+    ylab("Score") + 
+    theme(plot.title = element_text(size = 18))
   
-  ggsave("statistics/plots/open-total-scores.svg", plot = opent_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/open-total-scores.svg", plot = opent_plot, width = 10, height = 8)
   
   openc_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.correct, fill = condition)) +
     labs(title = "Problem-solving questions (correct)") +
     xlab("Condition") + 
-    ylab("Score")
+    ylab("Score") + 
+    theme(plot.title = element_text(size = 18))
   
-  ggsave("statistics/plots/open-total-scores.svg", plot = openc_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/open-correct-scores.svg", plot = openc_plot, width = 10, height = 8)
   
   cloze_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = cloze, fill = condition)) +
     labs(title = "Cloze test") +
     xlab("Condition") + 
-    ylab("Score")
+    ylab("Score") + 
+    theme(plot.title = element_text(size = 18))
   
-  ggsave("statistics/plots/open-total-scores.svg", plot = cloze_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/cloze-scores.svg", plot = cloze_plot, width = 10, height = 8)
 }
 
 
@@ -137,7 +141,7 @@ run_tests <- function(df) {
 }
 
 # Load the data and create long data
-task.scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
+task.scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
 long <- create_long_form(task.scores)
 
 # Plot the long data

@@ -42,7 +42,7 @@ check_assumptions <- function(control, treatment) {
 #' @param output Output folder
 #' 
 statistical_test <- function(control, treatment, norm_viol, task, mod) {
-  output_file = paste("eeg_processing/results/statistics/statistical_tests/", mod, "-", task, "-", "result.txt", sep = "")
+  output_file = paste("eeg_processing/results/statistics/statistical-tests/", mod, "-", task, "-", "result.txt", sep = "")
   cat(paste("Statistics generated at", Sys.time(), sep = " "), file = output_file, append = FALSE, sep = "\n")
   
   for (iChan in 1:NCHANS) {
@@ -85,7 +85,7 @@ plot_data <- function(control_fe, treatment_fe, control_vb, treatment_vb, task) 
                            indices = unlist(concat_data))
     
     plot <- ggplot(data = na.omit(plt_data)) +
-      geom_boxplot(aes(x = condition, y = indices, fill = model), width = 0.8) +
+      geom_boxplot(aes(x = model, y = indices, fill = condition), width = 0.8) +
       labs(title = CHANS[iChan]) +
       theme(axis.title.x = element_blank(),
             axis.title.y = element_blank(),
@@ -93,7 +93,8 @@ plot_data <- function(control_fe, treatment_fe, control_vb, treatment_vb, task) 
             axis.ticks.x = element_blank(),
             axis.text.y = element_text(size = 18),
             plot.title = element_text(size = 26, hjust = 0.5),
-            legend.position = "none")
+            legend.position = "none"
+            )
     
     ggsave(paste(output_loc, "chan", CHANS[iChan], ".svg", sep=""), plot = plot, width = 5, height = 5)
   }
@@ -145,17 +146,18 @@ run <- function() {
 
   for (i in 1:length(tasks)) {
     listidx <- i + (i-1) * 3
+    
     curr_task <- tasks[i]
     control_fe <- eeg_data[[listidx]]
     control_vb <- eeg_data[[listidx+2]]
     treatment_fe <- eeg_data[[listidx+1]]
     treatment_vb <- eeg_data[[listidx+3]]
     
-    norm_violated <- check_assumptions(control_fe, treatment_fe)
-    statistical_test(control_fe, treatment_fe, norm_violated, curr_task, "FE")
+    norm_violated_fe <- check_assumptions(control_fe, treatment_fe)
+    statistical_test(control_fe, treatment_fe, norm_violated_fe, curr_task, "FE")
     
-    norm_violated <- check_assumptions(control_vb, treatment_vb)
-    statistical_test(control_vb, treatment_vb, norm_violated, curr_task, "VB")
+    norm_violated_vb <- check_assumptions(control_vb, treatment_vb)
+    statistical_test(control_vb, treatment_vb, norm_violated_vb, curr_task, "VB")
     
     plot_data(control_fe, treatment_fe, control_vb, treatment_vb, curr_task)
   }

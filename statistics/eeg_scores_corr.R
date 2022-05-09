@@ -15,14 +15,21 @@ source("statistics/stat_funcs.R")
 #' @param chan String indicating the channel to be processed
 #' 
 plot_correlation <- function(df, mod, task, chan) {
-  output <- paste("statistics/plots/correlation/", task, "/", sep = "")
+  output <- paste("statistics/plots/correlation-eeg-scores/", task, "/", sep = "")
   
   plot <- ggplot(data = na.omit(df), aes(x = score, y = index, color = factor(condition))) + 
     geom_point() + 
     geom_smooth(method = "lm", se = FALSE) +
-    theme(legend.position = "none")
-  
-  ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 3.25, height = 3.75)
+    labs(title = chan) +
+    theme(axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(size = 18),
+          axis.text.y = element_text(size = 18),
+          plot.title = element_text(size = 26, hjust = 0.5),
+          legend.position = "none"
+    )
+
+  ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)
 }
 
 
@@ -37,29 +44,35 @@ plot_correlation <- function(df, mod, task, chan) {
 #' 
 create_regression <- function(df, scores, mod, task) {
   # Create target output folder and file
-  output_file = paste("statistics/tests/correlation-eegscores/", mod, "-", task, "-", "result.txt", sep = "")
+  output_file = paste("statistics/tests/correlation-eeg-scores/", mod, "-", task, "-", "result.txt", sep = "")
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
   # Create outcome and predictor variables
-  outcome <- scores
+  df$tscores <- scores
   predictors <- vector(length = NCHANS)
   for (i in 1:NCHANS) {
     name <- paste("eeg", CHANS[i], mod, task, sep = ".")
     predictors[i] <- name
   }
   
-  frml <- paste("scores ~ ", paste(predictors, collapse = " + "), sep = "")
+  control_df <- subset(df, condition == "control")
+  treatment_df <- subset(df, condition == "treatment")
+  
+  frml <- paste("tscores ~ ", paste(predictors, collapse = " + "), sep = "")
   frml <- as.formula(frml)
   
   # Run linear model and write results to file
-  models <- df %>% group_by(condition) %>% do(model = lm(formula = frml, data = df))
-  output <- capture.output(lapply(models$model, summary))
+  # models <- df %>% group_by(condition) %>% do(model = lm(formula = frml, data = df))
+  # output <- capture.output(lapply(models$model, summary))
+  # cat(output, file = output_file, append = TRUE, sep = "\n")
+  control_model <- lm(formula = frml, data = control_df, na.action = na.omit)
+  output <- capture.output(summary(control_model))
   cat(output, file = output_file, append = TRUE, sep = "\n")
   
   # Write linear model assumptions to file
-  assumptions <- capture.output(lapply(models$model, gvlma))
-  cat(assumptions, file = output_file, append = TRUE, sep = "\n")
-  return(models)
+  # assumptions <- capture.output(lapply(models$model, gvlma))
+  # cat(assumptions, file = output_file, append = TRUE, sep = "\n")
+  return(control_model)
 }
 
 
@@ -71,7 +84,7 @@ create_regression <- function(df, scores, mod, task) {
 #' 
 run_correlation <- function(data) {
   # Load task scores file and create relative scores
-  task_scores <- read.csv("survey_analysis/extracted/complete-task_scores.csv")
+  task_scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
   task_scores <- relative_scores(task_scores)
 
   # Loop over tasks and models, and run the regression
@@ -87,7 +100,6 @@ run_correlation <- function(data) {
        for (iChan in 1:NCHANS) {
          ch <- CHANS[iChan]
          eeg_colname <- paste("eeg", ch, mod, task, sep = ".")
-         print(paste("Selecting", scores_colname, eeg_colname))
          plotdata <- data.frame(condition = data$condition,
                                 index = data[,eeg_colname],
                                 score = task_scores[,scores_colname])

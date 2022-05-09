@@ -6,12 +6,12 @@ dir_treatment = "data/raw/treatment";
 
 % Create statistics and write to file
 [control_statistics_FE, control_statistics_VB] = generate_statistics(dir_control);
-write_to_file(control_statistics_FE, 'results/statistics/data_statistics/control_FE.csv');
-write_to_file(control_statistics_VB, 'results/statistics/data_statistics/control_VB.csv');
+write_to_file(control_statistics_FE, 'results/statistics/data-statistics/control_FE.csv');
+write_to_file(control_statistics_VB, 'results/statistics/data-statistics/control_VB.csv');
 
 [treatment_statistics_FE, treatment_statistics_VB] = generate_statistics(dir_treatment);
-write_to_file(treatment_statistics_FE, 'results/statistics/data_statistics/treatment_FE.csv');
-write_to_file(treatment_statistics_VB, 'results/statistics/data_statistics/treatment_VB.csv');
+write_to_file(treatment_statistics_FE, 'results/statistics/data-statistics/treatment_FE.csv');
+write_to_file(treatment_statistics_VB, 'results/statistics/data-statistics/treatment_VB.csv');
 
 function [statistics_FE, statistics_VB] = generate_statistics(data_dir)
     % generate_statistics() - Generate some basic data statistics

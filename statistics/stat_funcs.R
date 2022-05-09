@@ -39,6 +39,13 @@ load_eeg <- function() {
                    cloze_control_FE, cloze_treatment_FE,
                    cloze_control_VB, cloze_treatment_VB)
   
+  names(eeg_data) <- c("yesno_control_FE", "yesno_treatment_FE",
+                       "yesno_control_VB", "yesno_treatment_VB",
+                       "open_control_FE", "open_treatment_FE",
+                       "open_control_VB", "open_treatment_VB",
+                       "cloze_control_FE", "cloze_treatment_FE",
+                       "cloze_control_VB", "cloze_treatment_VB")
+  
   return(eeg_data)
 }
 
