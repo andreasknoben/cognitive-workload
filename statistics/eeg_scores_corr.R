@@ -10,8 +10,6 @@ source("statistics/stat_funcs.R")
 #' First creates a scatterplot of scores on x and indices on y (by condition),
 #' then draws a line through it as the linear model would. These plots are saved to disk.
 #' @param df Dataframe with data for plotting
-#' @param mod String indicating the model to be processed
-#' @param task String indicating the task to be processed
 #' @param chan String indicating the channel to be processed
 #' 
 plot_correlation <- function(df, chan) {
@@ -85,7 +83,7 @@ create_regression <- function(df, scores) {
   cat(treatment_assumptions, file = output_file, append = TRUE, sep = "\n")
 }
 
-
+# Load data and call function
 all_data <- read.csv("statistics/complete-data/complete-data.csv")
 task_scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
 task_scores <- relative_scores(task_scores)
