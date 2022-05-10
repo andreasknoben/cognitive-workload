@@ -14,10 +14,10 @@ source("statistics/stat_funcs.R")
 #' @param task String indicating the task to be processed
 #' @param chan String indicating the channel to be processed
 #' 
-plot_correlation <- function(df, mod, task, chan) {
-  output <- paste("statistics/plots/correlation-eeg-scores/", task, "/", sep = "")
+plot_correlation <- function(df, chan) {
+  output <- "statistics/plots/correlation-eeg-scores/"
   
-  plot <- ggplot(data = na.omit(df), aes(x = score, y = index, color = factor(condition))) + 
+  plot <- ggplot(data = na.omit(df), aes(x = scores, y = index, color = factor(condition))) + 
     geom_point() + 
     geom_smooth(method = "lm", se = FALSE) +
     labs(title = chan) +
@@ -29,86 +29,65 @@ plot_correlation <- function(df, mod, task, chan) {
           legend.position = "none"
     )
 
-  ggsave(paste(output, mod, "-", task, "-", chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)
+  ggsave(paste(output, chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)
 }
 
 
-#' Runs a linear regression of channels on scores
+#' Creates the linear models and runs the regression
 #' 
-#' Creates a linear model with all channels as predictors for a task/model
-#' and prints the output to a file, where 1 is control and 2 is treatment (in file)
+#' This function creates a linear model for the control and treatment conditions
+#' and also calls the appropriate plotting functions.
 #' @param df Dataframe with all data
-#' @param mod String indicating the model to be processed
-#' @param task String indicating the task to be processed
-#' @return Returns the models created (one for control, one for treatment)
+#' @param scores Dataframe containing the relative scores
 #' 
-create_regression <- function(df, scores, mod, task) {
-  # Create target output folder and file
-  output_file = paste("statistics/tests/correlation-eeg-scores/", mod, "-", task, "-", "result.txt", sep = "")
+create_regression <- function(df, scores) {
+  output_file <- "statistics/tests/correlation-eeg-scores.txt"
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
+  df$comb_scores <- rowMeans(scores[c("FE.yesno.rel", "VB.yesno.rel",
+                                      "FE.open.rel",  "VB.open.rel",
+                                      "FE.cloze.rel", "FE.cloze.rel")])
   
-  # Create outcome and predictor variables
-  df$tscores <- scores
   predictors <- vector(length = NCHANS)
+  
   for (i in 1:NCHANS) {
-    name <- paste("eeg", CHANS[i], mod, task, sep = ".")
-    predictors[i] <- name
+    chan <- CHANS[i]
+    
+    comb_colname <- paste("eeg", chan, "fe", sep = "_")
+    predictors[i] <- comb_colname
+
+    source_colnames <- c(paste("eeg", chan, "fe", "yesno", sep = "."),
+                         paste("eeg", chan, "fe", "open", sep = "."),
+                         paste("eeg", chan, "fe", "cloze", sep = "."))
+    
+    df[,comb_colname] <- rowMeans(df[,source_colnames])
+    
+    plotdata <- data.frame(condition = df$condition, scores = df$comb_scores, index = df[,comb_colname])
+    plot_correlation(plotdata, chan)
   }
+  
+  regformula <- paste("comb_scores ~ ", paste(predictors, collapse = " + "), sep = "")
+  regformula <- as.formula(regformula)
   
   control_df <- subset(df, condition == "control")
   treatment_df <- subset(df, condition == "treatment")
+
+  # Check using complete pairwise obs!
+  control_mod <- lm(formula = regformula, data = control_df)
+  control_output <- capture.output(summary(control_mod))
+  control_assumptions <- capture.output(gvlma(control_mod))  
+  cat(control_output, file = output_file, append = TRUE, sep = "\n")
+  cat(control_assumptions, file = output_file, append = TRUE, sep = "\n")
   
-  frml <- paste("tscores ~ ", paste(predictors, collapse = " + "), sep = "")
-  frml <- as.formula(frml)
-  
-  # Run linear model and write results to file
-  # models <- df %>% group_by(condition) %>% do(model = lm(formula = frml, data = df))
-  # output <- capture.output(lapply(models$model, summary))
-  # cat(output, file = output_file, append = TRUE, sep = "\n")
-  control_model <- lm(formula = frml, data = control_df, na.action = na.omit)
-  output <- capture.output(summary(control_model))
-  cat(output, file = output_file, append = TRUE, sep = "\n")
-  
-  # Write linear model assumptions to file
-  # assumptions <- capture.output(lapply(models$model, gvlma))
-  # cat(assumptions, file = output_file, append = TRUE, sep = "\n")
-  return(control_model)
+  treatment_mod <- lm(formula = regformula, data = treatment_df)
+  treatment_output <- capture.output(summary(treatment_mod))
+  treatment_assumptions <- capture.output(gvlma(treatment_mod))
+  cat(treatment_output, file = output_file, append = TRUE, sep = "\n")
+  cat(treatment_assumptions, file = output_file, append = TRUE, sep = "\n")
 }
 
-
-#' Helper function to run the correlation
-#' 
-#' Creates the required dataframes, then loops over tasks and mods to call the
-#' functions with the correct arguments; then loops over channels to create plots.
-#' @param data The dataframe with all data
-#' 
-run_correlation <- function(data) {
-  # Load task scores file and create relative scores
-  task_scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
-  task_scores <- relative_scores(task_scores)
-
-  # Loop over tasks and models, and run the regression
-  tasks <- c("yesno", "open", "cloze")
-  mods <- c("fe", "vb")
-  
-  for (task in tasks) {
-    for (mod in mods) {
-       scores_colname <- paste(toupper(mod), task, "rel", sep = ".")
-       corr <- create_regression(data, task_scores[,scores_colname], mod, task)
-       
-       # Loop over channels to create plots
-       for (iChan in 1:NCHANS) {
-         ch <- CHANS[iChan]
-         eeg_colname <- paste("eeg", ch, mod, task, sep = ".")
-         plotdata <- data.frame(condition = data$condition,
-                                index = data[,eeg_colname],
-                                score = task_scores[,scores_colname])
-         
-         plot_correlation(plotdata, mod, task, ch)
-       }
-    }
-  }
-}
 
 all_data <- read.csv("statistics/complete-data/complete-data.csv")
-run_correlation(all_data)
+task_scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
+task_scores <- relative_scores(task_scores)
+
+create_regression(all_data, task_scores)
