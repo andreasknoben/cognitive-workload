@@ -29,13 +29,10 @@ The `statistics` folder contains the code for the statistical analyses and visua
 The `combine_data.R` file combines the EEG Engagement Indices, task scores, and questionnaire answers into one data file.
 
 ### eeg_scores_corr.R
-The `eeg_scores_corr.R` file statistically analyses whether there is a correlation between the EEG Engagement Indices and the task scores. It creates multiple linear regression models to test this. Furthermore, it visualises the correlation by creating a scatterplot with a line drawn through it.
+The `eeg_scores_corr.R` file statistically analyses whether there is a correlation between the EEG Engagement Indices and the task scores, aggregated by task and model. It creates two linear regression models to test this, one for control, and one for treatment. Furthermore, it visualises the correlation by creating a scatterplot with a line drawn through it.
 
 ### eeg_stats.R
 The `statistical_tests.R` file aims to compare the EEG Engagement Indices between the LOEM and HOEM groups. It checks normality for each channel. If the normality assumption is violated, it runs a Mann-Whitney U test to compare the LOEM and HOEM groups. If the normality assumption is not violated, it runs a Welch independent samples t-test. The results are stored in the respective folder for the task in the results folder. Furthermore, it also creates boxplots as a way of visualising the EEG Engagement Indices for each task, model, and channel.
-
-### eeg_subj_corr.R
-The `eeg_subj_corr.R` file statistically analyses whether there is a correlation between the EEG Engagement Indices and the NASA-TLX answers. It creates multiple linear regression models to test this. Furthermore, it visualises the correlation by creating a scatterplot with a line drawn through it.
 
 ### moderation_analysis.R
 The `moderation_analysis.R` file aims to find out whether there is a moderation effect of pre-experiment domain knowledge on the EEG Engagement Indices. It does this by creating multiple linear models and testing for the interaction effect of condition * moderator on the indices.
