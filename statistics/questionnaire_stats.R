@@ -121,5 +121,70 @@ plot_rfk <- function(data) {
   ggsave("survey_analysis/results/pre-experiment/rfk26.svg", plot = rfk26plot, device = "svg", width = 6, height = 5)
 }
 
+create_plot <- function(data, filename, title) {
+  likert_levels <- c("Strongly disagree", "Disagree", "Somewhat disagree", "Neither agree nor disagree",
+                     "Somewhat agree", "Agree", "Strongly agree")
+  data <- as.data.frame(data)
+  data$Var2 <- factor(data$Var2, levels = likert_levels)
+  
+  plot <- ggplot(data = data, aes(x = Var2, y = Freq, fill = Var1)) +
+    geom_bar(stat = "identity", position = "dodge", width = 0.6) +
+    coord_flip() +
+    scale_x_discrete(limits=rev) +
+    labs(title = title,
+         fill = "Condition") +
+    xlab("Answer") + 
+    ylab("Frequency") + 
+    ylim(c(0, 0.5)) +
+    theme(plot.title = element_text(size = 14),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 16)) +
+    scale_fill_discrete(labels = c("LOEM", "HOEM"))
+  
+  ggsave(filename = paste("survey_analysis/results/post-experiment/", filename, ".svg", sep = ""),
+         plot = plot, device = "svg", width = 8, height = 5)
+  print(plot)
+}
+
+plot_postq <- function(data) {
+  understand1 <- table(data$condition, data$understand.1)
+  understand1_rel <- understand1 / length(data$understand.1)
+  create_plot(understand1_rel, "understand1", "Understand 1")
+  
+  understand2 <- table(data$condition, data$understand.2)
+  understand2_rel <- understand2 / length(data$understand.2)
+  create_plot(understand2_rel, "understand2", "Understand 2")
+  
+  use1 <- table(data$condition, data$use.1)
+  use1_rel <- use1 / length(data$use.1)
+  create_plot(use1_rel, "use1",  "Use 1")
+  
+  use2 <- table(data$condition, data$use.2)
+  use2_rel <- use2 / length(data$use.2)
+  create_plot(use2_rel, "use2", "Use 2")
+  
+  load <- table(data$condition, data$load)
+  load_rel <- load / length(data$load)
+  create_plot(load_rel, "load", "Load")
+  
+  data$eng.1[data$eng.1 == "nan"] <- NA
+  eng1 <- table(data$condition, data$eng.1, useNA = "no")
+  eng1_rel <- eng1 / length(data$eng.1)
+  create_plot(eng1_rel, "eng1", "English 1")
+  
+  data$eng.2[data$eng.2 == "nan"] <- NA
+  eng2 <- table(data$condition, data$eng.2)
+  eng2_rel <- eng2 / length(data$eng.2)
+  create_plot(eng2_rel, "eng2", "English 2")
+  
+  data$eng.3[data$eng.3 == "nan"] <- NA
+  eng3 <- table(data$condition, data$eng.3)
+  eng3_rel <- eng3 / length(data$eng.3)
+  create_plot(eng3_rel, "eng3", "English 3")
+}
+
 plot_btk(all_data)
 plot_rfk(all_data)
+plot_postq(all_data)
