@@ -55,39 +55,63 @@ create_long_form <- function(data) {
 plot_scores <- function(data) {
   yn_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = yesno, fill = condition)) +
-    labs(title = "Yes no questions") +
-    xlab("Condition") + 
+    labs(title = "Yes no questions",
+         fill = "Condition") +
+    xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 18))
+    theme(plot.title = element_text(size = 20),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 16)) +
+    scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/yesno-scores.svg", plot = yn_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/yesno-scores.svg", plot = yn_plot, width = 8, height = 6)
   
   opent_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.total, fill = condition)) +
-    labs(title = "Problem-solving questions (total)") +
-    xlab("Condition") + 
+    labs(title = "Problem-solving questions (total)",
+         fill = "Condition") +
+    xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 18))
+    theme(plot.title = element_text(size = 20),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 16)) +
+    scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/open-total-scores.svg", plot = opent_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/open-total-scores.svg", plot = opent_plot, width = 8, height = 6)
   
   openc_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.correct, fill = condition)) +
-    labs(title = "Problem-solving questions (correct)") +
-    xlab("Condition") + 
+    labs(title = "Problem-solving questions (correct)",
+         fill = "Condition") +
+    xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 18))
+    theme(plot.title = element_text(size = 20),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 16)) +
+    scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/open-correct-scores.svg", plot = openc_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/open-correct-scores.svg", plot = openc_plot, width = 8, height = 6)
   
   cloze_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = cloze, fill = condition)) +
-    labs(title = "Cloze test") +
-    xlab("Condition") + 
+    labs(title = "Cloze test",
+         fill = "Condition") +
+    xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 18))
+    theme(plot.title = element_text(size = 20),
+          axis.text = element_text(size = 14),
+          axis.title = element_text(size = 14),
+          legend.text = element_text(size = 14),
+          legend.title = element_text(size = 16)) +
+    scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/cloze-scores.svg", plot = cloze_plot, width = 10, height = 8)
+  ggsave("survey_analysis/results/cloze-scores.svg", plot = cloze_plot, width = 8, height = 6)
 }
 
 
