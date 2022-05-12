@@ -17,12 +17,12 @@ plot_correlation <- function(df, chan) {
   
   plot <- ggplot(data = na.omit(df), aes(x = scores, y = index, color = factor(condition))) + 
     geom_point() + 
-    geom_smooth(method = "lm", se = FALSE) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
     labs(title = chan) +
     theme(axis.title.x = element_blank(),
           axis.title.y = element_blank(),
-          axis.text.x = element_text(size = 18),
-          axis.text.y = element_text(size = 18),
+          axis.text.x = element_text(size = 20),
+          axis.text.y = element_text(size = 20),
           plot.title = element_text(size = 26, hjust = 0.5),
           legend.position = "none"
     )
@@ -50,12 +50,15 @@ create_regression <- function(df, scores) {
   for (i in 1:NCHANS) {
     chan <- CHANS[i]
     
-    comb_colname <- paste("eeg", chan, "fe", sep = "_")
+    comb_colname <- paste("eeg", chan, sep = "_")
     predictors[i] <- comb_colname
 
     source_colnames <- c(paste("eeg", chan, "fe", "yesno", sep = "."),
                          paste("eeg", chan, "fe", "open", sep = "."),
-                         paste("eeg", chan, "fe", "cloze", sep = "."))
+                         paste("eeg", chan, "fe", "cloze", sep = "."),
+                         paste("eeg", chan, "vb", "yesno", sep = "."),
+                         paste("eeg", chan, "vb", "open", sep = "."),
+                         paste("eeg", chan, "vb", "cloze", sep = "."))
     
     df[,comb_colname] <- rowMeans(df[,source_colnames])
     
@@ -65,7 +68,7 @@ create_regression <- function(df, scores) {
   
   regformula <- paste("comb_scores ~ ", paste(predictors, collapse = " + "), sep = "")
   regformula <- as.formula(regformula)
-  
+
   control_df <- subset(df, condition == "control")
   treatment_df <- subset(df, condition == "treatment")
 
