@@ -1,6 +1,7 @@
 # Set working directory and load helper file with libraries, functions
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 source("statistics/stat_funcs.R")
+source("statistics/recode.R")
 
 all_data <- read.csv("statistics/complete-data/complete-data.csv")
 
@@ -185,6 +186,39 @@ plot_postq <- function(data) {
   create_plot(eng3_rel, "eng3", "English 3")
 }
 
+stat_test <- function(condition, measure) {
+  shapiro_test <- shapiro.test(measure)
+  if (shapiro_test$p.value < 0.05) {
+    test <- wilcox.test(measure ~ condition, na.action = "na.omit")
+  } else {
+    test <- t.test(measure ~ condition, var.equal = FALSE, na.action = "na.omit")
+  }
+  print(mean(measure[condition == "control"]))
+  print(mean(measure[condition == "treatment"]))
+  return(test)
+}
+
+postq_stats <- function(data) {
+  recoded_q <- recode_questionnaire(data)
+  output_file = "statistics/tests/post-experiment-q.txt"
+  cat(paste("Statistics generated at", Sys.time(), sep = " "), file = output_file, append = FALSE, sep = "\n")
+  
+  recoded_q$understand <- recoded_q$understand.1 + recoded_q$understand.2
+  recoded_q$use <- recoded_q$use.1 + recoded_q$use.2
+  recoded_q$english <- recoded_q$eng.1 + recoded_q$eng.2 + recoded_q$eng.3
+  
+  understand <- stat_test(data$condition, recoded_q$understand)
+  use <- stat_test(data$condition, recoded_q$use)
+  load <- stat_test(data$condition, recoded_q$load)
+  english <- stat_test(data$condition, recoded_q$english)
+  
+  cat(paste("Understand:", toString(understand), sep = "\n"), file = output_file, append = TRUE, sep = "\n")
+  cat(paste("Use:", toString(use), sep = "\n"), file = output_file, append = TRUE, sep = "\n")
+  cat(paste("Load:", toString(load), sep = "\n"), file = output_file, append = TRUE, sep = "\n")
+  cat(paste("English:", toString(english), sep = "\n"), file = output_file, append = TRUE, sep = "\n")
+}
+
 plot_btk(all_data)
 plot_rfk(all_data)
 plot_postq(all_data)
+postq_stats(all_data)
