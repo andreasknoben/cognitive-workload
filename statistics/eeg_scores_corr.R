@@ -41,9 +41,20 @@ plot_correlation <- function(df, chan) {
 create_regression <- function(df, scores) {
   output_file <- "statistics/tests/correlation-eeg-scores.txt"
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
-  df$comb_scores <- rowMeans(scores[c("FE.yesno.rel", "VB.yesno.rel",
-                                      "FE.open.rel",  "VB.open.rel",
-                                      "FE.cloze.rel", "FE.cloze.rel")])
+  
+  df$FE.yesno.z <- compute_z(df$FE.yesno)
+  df$VB.yesno.z <- compute_z(df$VB.yesno)
+  df$FE.open.correct.z <- compute_z(df$FE.open.correct)
+  df$VB.open.correct.z <- compute_z(df$VB.open.correct)
+  df$FE.open.total.z <- compute_z(df$FE.open.total)
+  df$VB.open.total.z <- compute_z(df$VB.open.total)
+  df$FE.cloze.z <- compute_z(df$FE.cloze)
+  df$VB.cloze.z <- compute_z(df$VB.cloze)
+  
+  df$comb_scores <- rowMeans(df[c("FE.yesno.z", "VB.yesno.z",
+                                  "FE.open.correct.z",  "VB.open.correct.z",
+                                  "FE.open.total.z", "FE.open.total.z",
+                                  "FE.cloze.z", "FE.cloze.z")])
   
   predictors <- vector(length = NCHANS)
   
@@ -72,7 +83,6 @@ create_regression <- function(df, scores) {
   control_df <- subset(df, condition == "control")
   treatment_df <- subset(df, condition == "treatment")
 
-  # Check using complete pairwise obs!
   control_mod <- lm(formula = regformula, data = control_df)
   control_output <- capture.output(summary(control_mod))
   control_assumptions <- capture.output(gvlma(control_mod))  
@@ -88,7 +98,4 @@ create_regression <- function(df, scores) {
 
 # Load data and call function
 all_data <- read.csv("statistics/complete-data/complete-data.csv")
-task_scores <- read.csv("survey_analysis/extracted/complete-task-scores.csv")
-task_scores <- relative_scores(task_scores)
-
-create_regression(all_data, task_scores)
+create_regression(all_data)

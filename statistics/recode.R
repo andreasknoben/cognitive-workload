@@ -23,13 +23,23 @@ recode_yesno <- function(col) {
 #' @param term The type of Likert scale "semantic-wise"
 #' @return Vector of recoded values
 #'
-recode_likert <- function(col, term) {
+recode_likert <- function(col, term, reverse = FALSE) {
   if (term == "high") {
-    recoded_col <- recode(col, 'Very low' = 1, 'Low' = 2, 'Somewhat low' = 3, 'Neither low nor high' = 4,
-                          'Somewhat high' = 5, 'High' = 6, 'Very high' = 7, 'Very Low' = 1, .default = NA_real_)
+    if (reverse == TRUE) {
+      recoded_col <- recode(col, 'Very low' = 7, 'Low' = 6, 'Somewhat low' = 5, 'Neither low nor high' = 4,
+                            'Somewhat high' = 3, 'High' = 2, 'Very high' = 1, 'Very Low' = 7, .default = NA_real_)
+    } else {
+      recoded_col <- recode(col, 'Very low' = 1, 'Low' = 2, 'Somewhat low' = 3, 'Neither low nor high' = 4,
+                            'Somewhat high' = 5, 'High' = 6, 'Very high' = 7, 'Very Low' = 1, .default = NA_real_)
+    }
   } else if (term == "agree") {
-    recoded_col <- recode(col, 'Strongly disagree' = 1, 'Disagree' = 2, 'Somewhat disagree' = 3, 'Neither agree nor disagree' = 4,
-                          'Somewhat agree' = 5, 'Agree' = 6, 'Strongly agree' = 7, .default = NA_real_)
+    if (reverse == TRUE) {
+      recoded_col <- recode(col, 'Strongly disagree' = 7, 'Disagree' = 6, 'Somewhat disagree' = 5, 'Neither agree nor disagree' = 4,
+                            'Somewhat agree' = 3, 'Agree' = 2, 'Strongly agree' = 1, .default = NA_real_)
+    } else {
+      recoded_col <- recode(col, 'Strongly disagree' = 1, 'Disagree' = 2, 'Somewhat disagree' = 3, 'Neither agree nor disagree' = 4,
+                            'Somewhat agree' = 5, 'Agree' = 6, 'Strongly agree' = 7, .default = NA_real_)
+    }
   }
   
   return(recoded_col)
@@ -61,7 +71,7 @@ recode_questionnaire <- function(qdf) {
   recoded$understand.1 <- recode_likert(qdf$understand.1, "agree")
   recoded$understand.2 <- recode_likert(qdf$understand.2, "agree")
   recoded$use.1 <- recode_likert(qdf$use.1, "agree")
-  recoded$use.2 <- recode_likert(qdf$use.2, "agree")
+  recoded$use.2 <- recode_likert(qdf$use.2, "agree", reverse = TRUE)
   recoded$load <- recode_likert(qdf$load, "agree")
   recoded$eng.1 <- recode_likert(qdf$eng.1, "agree")
   recoded$eng.2 <- recode_likert(qdf$eng.2, "agree")

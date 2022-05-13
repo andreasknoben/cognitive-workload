@@ -65,3 +65,14 @@ relative_scores <- function(scores) {
   
   return(scores)
 }
+
+#' Compute z scores given a vector of data
+#' 
+#' Calculates z scores according to (x - mean(x)) / (sd(x))
+#' @param data Data to calculate z scores of
+#' @return Returns a vector with z scores
+#' 
+compute_z <- function(data) {
+  z = (data - mean(data)) / sd(data)
+  return(z)
+}

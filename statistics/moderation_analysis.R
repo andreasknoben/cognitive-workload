@@ -3,17 +3,6 @@ setwd("~/Nextcloud/Projects/cognitive-workload/")
 source("statistics/stat_funcs.R")
 source("statistics/recode.R")
 
-#' Compute z scores given a vector of data
-#' 
-#' Calculates z scores according to (x - mean(x)) / (sd(x))
-#' @param data Data to calculate z scores of
-#' @return Returns a vector with z scores
-#' 
-compute_z <- function(data) {
-  z = (data - mean(data)) / sd(data)
-  return(z)
-}
-
 
 #' Creates scale variables out of the questionnaire answers, as done by Gemino (1999)
 #' 
