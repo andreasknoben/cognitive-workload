@@ -127,6 +127,7 @@ create_postq_plot <- function(data, filename, title) {
                      "Somewhat agree", "Agree", "Strongly agree")
   data <- as.data.frame(data)
   data$Var2 <- factor(data$Var2, levels = likert_levels)
+  data$Var1 <- factor(data$Var1, levels = c("treatment", "control"))
   
   plot <- ggplot(data = data, aes(x = Var2, y = Freq, fill = Var1)) +
     geom_bar(stat = "identity", position = "dodge", width = 0.6) +
@@ -142,7 +143,8 @@ create_postq_plot <- function(data, filename, title) {
           axis.title = element_text(size = 14),
           legend.text = element_text(size = 14),
           legend.title = element_text(size = 16)) +
-    scale_fill_discrete(labels = c("LOEM", "HOEM"))
+    scale_fill_discrete(labels = c("HOEM", "LOEM")) +
+    guides(fill = guide_legend(reverse = TRUE))
   
   ggsave(filename = paste("survey_analysis/results/post-experiment/", filename, ".svg", sep = ""),
          plot = plot, device = "svg", width = 8, height = 4)

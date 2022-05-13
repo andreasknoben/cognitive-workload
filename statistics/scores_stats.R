@@ -155,13 +155,15 @@ statistical_test <- function(task) {
 #' @param df The dataframe with all relative scores data
 #' 
 run_tests <- function(df) {
-  output_file = "survey_analysis/results/statistical-test.txt"
-  cat(paste("FE yes/no", toString(statistical_test(df$FE.yesno.rel)), sep = "\t"), file = output_file, sep = "\n", append = FALSE)
-  cat(paste("VB yes/no", toString(statistical_test(df$VB.yesno.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
-  cat(paste("FE open", toString(statistical_test(df$FE.open.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
-  cat(paste("VB open", toString(statistical_test(df$VB.open.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
-  cat(paste("FE cloze", toString(statistical_test(df$FE.cloze.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
-  cat(paste("VB cloze", toString(statistical_test(df$VB.cloze.rel)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  output_file = "survey_analysis/results/statistical-test-abs.txt"
+  cat(paste("FE yes/no", toString(statistical_test(df$FE.yesno)), sep = "\t"), file = output_file, sep = "\n", append = FALSE)
+  cat(paste("VB yes/no", toString(statistical_test(df$VB.yesno)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("FE open correct", toString(statistical_test(df$FE.open.correct)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("VB open correct", toString(statistical_test(df$VB.open.correct)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("FE open total", toString(statistical_test(df$FE.open.total)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("VB open total", toString(statistical_test(df$VB.open.total)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("FE cloze", toString(statistical_test(df$FE.cloze)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+  cat(paste("VB cloze", toString(statistical_test(df$VB.cloze)), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
 }
 
 # Load the data and create long data
@@ -172,5 +174,5 @@ long <- create_long_form(task.scores)
 plot_scores(long)
 
 # Compute relative scores and perform statistical tests
-task.scores <- relative_scores(task.scores)
+# task.scores <- relative_scores(task.scores)
 run_tests(task.scores)
