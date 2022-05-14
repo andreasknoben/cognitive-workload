@@ -2,7 +2,7 @@
 setwd("~/Nextcloud/Projects/cognitive-workload/")
 source("statistics/stat_funcs.R")
 
-plot_timetaken <- function(task, title, timer) {
+create_data <- function(task) {
   colname <- c(task)
   
   control_FE <- read.csv("eeg_processing/results/statistics/data-statistics/control_FE.csv")
@@ -14,9 +14,32 @@ plot_timetaken <- function(task, title, timer) {
                           model = rep(c("FE", "VB", "FE", "VB"), each = 29),
                           time = unlist(data.frame(control_FE[,colname]/60, control_VB[,colname]/60,
                                                    treatment_FE[,colname]/60, treatment_VB[,colname]/60)))
+}
+
+stat_test <- function(data) {
+  fe_data <- subset(data, model == "FE")
+  vb_data <- subset(data, model == "VB")
   
-  plot <- ggplot(data = comb_data) +
-    geom_boxplot(aes(x = model, y = time, fill = condition), width = 0.6) + 
+  if (normality(fe_data$time) == 1) {
+    fe_test <- t.test(time ~ condition, data = fe_data, var.equal = FALSE)
+  } else {
+    fe_test <- wilcox.test(time ~ condition, data = fe_data)
+  }
+  
+  if (normality(vb_data$time) == 1) {
+    vb_test <- t.test(time ~ condition, data = vb_data, var.equal = FALSE)
+  } else {
+    vb_test <- wilcox.test(time ~ condition, data = vb_data)
+  }
+  
+  return(paste(toString(fe_test), "\n\n", toString(vb_test), "\n\n"))
+}
+
+plot_timetaken <- function(data, task, title, timer) {
+  
+  
+  plot <- ggplot(data = data) +
+    geom_boxplot(aes(x = model, y = time, fill = condition), width = 0.75) + 
     geom_hline(aes(yintercept = timer, color = "line"),
                size = 1.2, alpha = 0.5) +
     labs(title = title,
@@ -36,7 +59,18 @@ plot_timetaken <- function(task, title, timer) {
          plot = plot, device = "svg", width = 5, height = 4)
 }
 
+output_file = "eeg_processing/results/statistics/data-statistics/statistics.txt"
+
 # Plot 1: yes/no, control FE vs treatment FE / control VB vs treatment VB
-plot_timetaken("yesno", "Yes-no questions", 8)
-plot_timetaken("open", "Problem-solving", 12)
-plot_timetaken("cloze", "Cloze test", 7)
+yesno_data <- create_data("yesno")
+plot_timetaken(yesno_data, "yesno", "Yes-no questions", 8)
+cat(paste("Yes/no", stat_test(yesno_data), sep = "\t"), file = output_file, sep = "\n", append = FALSE)
+
+open_data <- create_data("open")
+plot_timetaken(open_data, "open", "Problem-solving", 12)
+cat(paste("Open", stat_test(open_data), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+
+cloze_data <- create_data("cloze")
+plot_timetaken(cloze_data, "cloze", "Cloze test", 7)
+cat(paste("Cloze", stat_test(cloze_data), sep = "\t"), file = output_file, sep = "\n", append = TRUE)
+

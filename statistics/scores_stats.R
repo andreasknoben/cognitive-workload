@@ -115,23 +115,6 @@ plot_scores <- function(data) {
 }
 
 
-#' Tests the supplied data for normality using the Shapiro-Wilk test
-#' 
-#' If the data is not normally distributed, returns 0
-#' If the data is normally distributed, returns 1
-#' @param data The data to be tested for normality (a vector)
-#' @return Returns a 0 (not normal) or a 1 (normal)
-#' 
-normality <- function(data) {
-  test <- shapiro.test(data)
-  if (test$p.value < 0.05) {
-    return(0)
-  } else {
-    return(1)
-  }
-}
-
-
 #' Runs a statistical test on the provided task scores
 #' 
 #' If the normality is not violated, it runs a two-sided Welch's t-test,
