@@ -1,7 +1,15 @@
 import pandas as pd
 
 def import_survey(data_loc, n_subj):
-    '''Loads survey data and extracts last N_SUBJ answers.'''
+    '''Loads survey data and extracts last N_SUBJ answers.
+    
+        Parameters:
+            data_loc (String): String indicating the location of the raw survey data
+            n_subj (int): Integer indicating the number of participants in the study
+
+        Returns:
+            subjects_data (pd.DataFrame): Dataframe containing the raw survey data for the actual participants
+    '''
 
     survey_data = pd.read_csv(data_loc)
     subjects_data = survey_data.iloc[-n_subj:]
