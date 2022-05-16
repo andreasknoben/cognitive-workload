@@ -15,14 +15,12 @@ check_assumptions <- function(control, treatment) {
 
   for (iChan in 1:NCHANS) {
     control_data <- control[iChan][!is.na(control[iChan])]
-    shapiro_test <- shapiro.test(control_data)
-    if (shapiro_test$p.value < 0.05) {
+    if (normality(control_data) == 0) {
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
     
     treatment_data <- treatment[iChan][!is.na(treatment[iChan])]
-    shapiro_test <- shapiro.test(treatment_data)
-    if (shapiro_test$p.value < 0.05) {
+    if (normality(treatment_data) == 0) {
       norm_viol <- c(norm_viol, CHANS[iChan])
     }
   }

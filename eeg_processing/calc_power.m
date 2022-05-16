@@ -251,6 +251,8 @@ function [thetaPower, alphaPower, betaPower] = calculate_powers(data, chan, Fs)
     [spectra, freqs] = spectopo(data(chan,:), 0, Fs, 'plot', 'off');
 
     % Frequencies: theta 4-8 Hz; alpha 8-13 Hz; beta 13-30 Hz
+    % Source for calculation of absolute powers: 
+    % https://sccn.ucsd.edu/wiki/Makoto%27s_useful_EEGLAB_code
     thetaIdx = find(freqs>4 & freqs<8);
     alphaIdx = find(freqs>8 & freqs<13);
     betaIdx  = find(freqs>13 & freqs<30);

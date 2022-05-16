@@ -8,7 +8,7 @@ source("statistics/stat_funcs.R")
 #' Codes a No to 0, and a Yes to 1
 #' @param col Vector to be recoded
 #' @return Vector of recoded values
-
+#'
 recode_yesno <- function(col) {
   recoded_col <- recode(col, No = 0, Yes = 1)
   return(recoded_col)
@@ -20,7 +20,8 @@ recode_yesno <- function(col) {
 #' Can provide term "high" for a very low-very high scale
 #' Can provide term "agree" for a strongly disagree-strongly agree scale
 #' @param col Vector to be recoded
-#' @param term The type of Likert scale "semantic-wise"
+#' @param term The type of Likert scale "semantic-wise", either "high" or "agree"
+#' @param reverse Whether to reverse the scores given to the items, default is FALSE
 #' @return Vector of recoded values
 #'
 recode_likert <- function(col, term, reverse = FALSE) {

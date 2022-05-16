@@ -24,8 +24,7 @@ plot_correlation <- function(df, chan) {
           axis.text.x = element_text(size = 20),
           axis.text.y = element_text(size = 20),
           plot.title = element_text(size = 26, hjust = 0.5),
-          legend.position = "none"
-    )
+          legend.position = "none")
 
   ggsave(paste(output, chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)
 }
@@ -39,9 +38,11 @@ plot_correlation <- function(df, chan) {
 #' @param scores Dataframe containing the relative scores
 #' 
 create_regression <- function(df, scores) {
+  # Create initial file
   output_file <- "statistics/tests/correlation-eeg-scores.txt"
   cat("Statistics generated", file = output_file, append = FALSE, sep = "\n")
   
+  # Compute z scores for all task scores
   df$FE.yesno.z <- compute_z(df$FE.yesno)
   df$VB.yesno.z <- compute_z(df$VB.yesno)
   df$FE.open.correct.z <- compute_z(df$FE.open.correct)
@@ -51,11 +52,13 @@ create_regression <- function(df, scores) {
   df$FE.cloze.z <- compute_z(df$FE.cloze)
   df$VB.cloze.z <- compute_z(df$VB.cloze)
   
+  # Take average over all task/model z-scores
   df$comb_scores <- rowMeans(df[c("FE.yesno.z", "VB.yesno.z",
                                   "FE.open.correct.z",  "VB.open.correct.z",
                                   "FE.open.total.z", "FE.open.total.z",
                                   "FE.cloze.z", "FE.cloze.z")])
   
+  # Average EEG Engagement Indices over tasks and models
   predictors <- vector(length = NCHANS)
   
   for (i in 1:NCHANS) {
@@ -77,12 +80,13 @@ create_regression <- function(df, scores) {
     plot_correlation(plotdata, chan)
   }
   
+  # Create formulae and linear models that will use them, print results to file
   regformula <- paste("comb_scores ~ ", paste(predictors, collapse = " + "), sep = "")
   regformula <- as.formula(regformula)
 
   control_df <- subset(df, condition == "control")
   treatment_df <- subset(df, condition == "treatment")
-
+  
   control_mod <- lm(formula = regformula, data = control_df)
   control_output <- capture.output(summary(control_mod))
   control_assumptions <- capture.output(gvlma(control_mod))  

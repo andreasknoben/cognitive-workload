@@ -1,16 +1,16 @@
 % Calculates EEG Engagement Indices and stores them to CSV files
 
-NPART = 58;
-NCHAN = 16;
-NPOWS = 3;
+% Set constants
+NPART = 58;     % Number of participants
+NCHAN = 16;     % Number of channels
+NPOWS = 3;      % Number of powers to be calculated
 CHANS = ["Fp1" "Fp2" "F3" "Fz" "F4" "T7" "C3" "Cz" "C4" "T8" "P3" "Pz" "P4" "PO7" "PO8" "Oz"];
 
 result = fill_matrices(NCHAN, NPART, CHANS);
 write_to_files(result);
 
 function structure = create_matrices(NPART, NCHAN)
-    % create_matrices() - Creates a structure with matrices
-    %                     for all conditions
+    % create_matrices() - Creates a structure with matrices for all conditions
     % Required inputs:
     %   NPART   - Number of participants
     %   NCHAN   - Number of channels
@@ -19,7 +19,8 @@ function structure = create_matrices(NPART, NCHAN)
     treatment_FE = zeros(NPART/2, NCHAN);
     control_VB = zeros(NPART/2, NCHAN);
     treatment_VB = zeros(NPART/2, NCHAN);
-    structure = struct('control_FE', control_FE, 'treatment_FE', treatment_FE, 'control_VB', control_VB, 'treatment_VB', treatment_VB);
+    structure = struct('control_FE', control_FE, 'treatment_FE', treatment_FE, ...
+                       'control_VB', control_VB, 'treatment_VB', treatment_VB);
 end
 
 function index = perform_calc(powers)
