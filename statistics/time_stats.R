@@ -75,11 +75,11 @@ plot_timetaken <- function(data, task, title, timer) {
          colour = element_blank()) +
     xlab("Case") + 
     ylab("Time (minutes)") + 
-    theme(plot.title = element_text(size = 14),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 20),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 18)) +
     scale_fill_discrete(labels = c("LOEM", "HOEM")) +
     scale_color_discrete(labels = c("Timer"))
   

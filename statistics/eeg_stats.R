@@ -87,10 +87,9 @@ plot_data <- function(control_fe, treatment_fe, control_vb, treatment_vb, task) 
       labs(title = CHANS[iChan]) +
       theme(axis.title.x = element_blank(),
             axis.title.y = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.text.y = element_text(size = 20),
-            plot.title = element_text(size = 26, hjust = 0.5),
+            axis.text.x = element_text(size = 26),
+            axis.text.y = element_text(size = 26),
+            plot.title = element_text(size = 32, hjust = 0.5),
             legend.position = "none"
             )
     
