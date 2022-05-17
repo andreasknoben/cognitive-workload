@@ -21,9 +21,9 @@ plot_correlation <- function(df, chan) {
     labs(title = chan) +
     theme(axis.title.x = element_blank(),
           axis.title.y = element_blank(),
-          axis.text.x = element_text(size = 20),
-          axis.text.y = element_text(size = 20),
-          plot.title = element_text(size = 26, hjust = 0.5),
+          axis.text.x = element_text(size = 26),
+          axis.text.y = element_text(size = 26),
+          plot.title = element_text(size = 32, hjust = 0.5),
           legend.position = "none")
 
   ggsave(paste(output, chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)

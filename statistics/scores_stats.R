@@ -59,44 +59,47 @@ plot_scores <- function(data) {
          fill = "Condition") +
     xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 20),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 28),
+          axis.text = element_text(size = 22),
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size = 22),
+          legend.text = element_text(size = 22),
+          legend.title = element_text(size = 24)) +
     scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/yesno-scores.svg", plot = yn_plot, width = 8, height = 6)
+  ggsave("survey_analysis/results/yesno-scores.svg", plot = yn_plot, width = 8, height = 5)
   
   opent_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.total, fill = condition)) +
-    labs(title = "Problem-solving questions (total)",
+    labs(title = "Problem-solving (total)",
          fill = "Condition") +
     xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 20),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 28),
+          axis.text = element_text(size = 22),
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size = 22),
+          legend.text = element_text(size = 22),
+          legend.title = element_text(size = 24)) +
     scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/open-total-scores.svg", plot = opent_plot, width = 8, height = 6)
+  ggsave("survey_analysis/results/open-total-scores.svg", plot = opent_plot, width = 8, height = 5)
   
   openc_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = open.correct, fill = condition)) +
-    labs(title = "Problem-solving questions (correct)",
+    labs(title = "Problem-solving (correct)",
          fill = "Condition") +
     xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 20),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 28),
+          axis.text = element_text(size = 22),
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size = 22),
+          legend.text = element_text(size = 22),
+          legend.title = element_text(size = 24)) +
     scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/open-correct-scores.svg", plot = openc_plot, width = 8, height = 6)
+  ggsave("survey_analysis/results/open-correct-scores.svg", plot = openc_plot, width = 8, height = 5)
   
   cloze_plot <- ggplot(data = data) + 
     geom_boxplot(aes(x = model, y = cloze, fill = condition)) +
@@ -104,14 +107,15 @@ plot_scores <- function(data) {
          fill = "Condition") +
     xlab("Case") + 
     ylab("Score") + 
-    theme(plot.title = element_text(size = 20),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 28),
+          axis.text = element_text(size = 22),
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size = 22),
+          legend.text = element_text(size = 22),
+          legend.title = element_text(size = 24)) +
     scale_fill_discrete(labels = c("LOEM", "HOEM"))
   
-  ggsave("survey_analysis/results/cloze-scores.svg", plot = cloze_plot, width = 8, height = 6)
+  ggsave("survey_analysis/results/cloze-scores.svg", plot = cloze_plot, width = 8, height = 5)
 }
 
 

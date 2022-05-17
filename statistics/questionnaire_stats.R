@@ -44,11 +44,11 @@ create_preq_plot <- function(data, filename, title) {
     labs(title = title) +
     ylab("Frequency") + 
     ylim(c(0, 1)) +
-    theme(plot.title = element_text(size = 14),
-          axis.text.y = element_text(size = 12),
-          axis.text.x = element_text(size = 14),
+    theme(plot.title = element_text(size = 18),
+          axis.text.y = element_text(size = 16),
+          axis.text.x = element_text(size = 16),
           axis.title.y = element_blank(),
-          axis.title.x = element_text(size = 14),
+          axis.title.x = element_text(size = 16),
           legend.position = "none")
     
   ggsave(filename, plot = plot, device = "svg", width = 7.5, height = 5)
@@ -75,7 +75,7 @@ plot_btk <- function(data) {
   
   # Plot relative frequencies of the answers to BTK1
   create_preq_plot(btk1_rel, "survey_analysis/results/pre-experiment/btk1.svg",
-                   "Level of knowledge of organising a bus tour company")
+                   "Knowledge: organise bus tour company")
   
   # Prepare data to plot BTK2 to BTK6
   long_btk <- long_preq(data, "bus")
@@ -96,11 +96,11 @@ plot_btk <- function(data) {
     xlab("Question") + 
     ylab("Frequency") + 
     ylim(c(0, 1)) +
-    theme(plot.title = element_text(size = 14),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 18),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 18)) +
     scale_fill_discrete(breaks = c("Yes", "No")) + 
     scale_x_discrete(labels = axislabels, limits = rev)
   
@@ -128,7 +128,7 @@ plot_rfk <- function(data) {
   
   # Plot relative frequencies of the answers to RFK1
   create_preq_plot(rfk1_rel, "survey_analysis/results/pre-experiment/rfk1.svg",
-                   "Level of knowledge of organising a machine repair facility")
+                   "Knowledge: organise machinery repair")
   
   # Prepare data to plot RFK2 to RFK6
   long_rfk <- long_preq(data, "machine")
@@ -149,11 +149,11 @@ plot_rfk <- function(data) {
     xlab("Question") + 
     ylab("Frequency") + 
     ylim(c(0, 1)) +
-    theme(plot.title = element_text(size = 14),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 18),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 18)) +
     scale_fill_discrete(breaks = c("Yes", "No")) + 
     scale_x_discrete(labels = axislabels, limits = rev)
   
@@ -186,11 +186,11 @@ create_postq_plot <- function(data, filename, title) {
     xlab("Answer") + 
     ylab("Frequency") + 
     ylim(c(0, 0.5)) +
-    theme(plot.title = element_text(size = 14),
-          axis.text = element_text(size = 14),
-          axis.title = element_text(size = 14),
-          legend.text = element_text(size = 14),
-          legend.title = element_text(size = 16)) +
+    theme(plot.title = element_text(size = 18),
+          axis.text = element_text(size = 16),
+          axis.title = element_text(size = 16),
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 18)) +
     scale_fill_discrete(labels = c("HOEM", "LOEM")) +
     guides(fill = guide_legend(reverse = TRUE))
   
@@ -207,7 +207,7 @@ create_postq_plot <- function(data, filename, title) {
 plot_postq <- function(data) {
   understand1 <- table(data$condition, data$understand.1)
   understand1_rel <- understand1 / length(data$understand.1)
-  create_postq_plot(understand1_rel, "understand1", "(1) Easy to understand ERDs")
+  create_postq_plot(understand1_rel, "understand1", "(1) Understanding easy")
   
   understand2 <- table(data$condition, data$understand.2)
   understand2_rel <- understand2 / length(data$understand.2)
@@ -219,21 +219,21 @@ plot_postq <- function(data) {
   
   use2 <- table(data$condition, data$use.2)
   use2_rel <- use2 / length(data$use.2)
-  create_postq_plot(use2_rel, "use2", "(4) Use of ERDs was frustrating")
+  create_postq_plot(use2_rel, "use2", "(4) Frustrating to use")
   
   load <- table(data$condition, data$load)
   load_rel <- load / length(data$load)
-  create_postq_plot(load_rel, "load", "(5) Tasks required little effort")
+  create_postq_plot(load_rel, "load", "(5) Little effort required")
   
   data$eng.1[data$eng.1 == "nan"] <- NA
   eng1 <- table(data$condition, data$eng.1, useNA = "no")
   eng1_rel <- eng1 / length(data$eng.1)
-  create_postq_plot(eng1_rel, "eng1", "(6) Confident in English comprehension")
+  create_postq_plot(eng1_rel, "eng1", "(6) Confident in Eng. comprehension")
   
   data$eng.2[data$eng.2 == "nan"] <- NA
   eng2 <- table(data$condition, data$eng.2)
   eng2_rel <- eng2 / length(data$eng.2)
-  create_postq_plot(eng2_rel, "eng2", "(7) Could comprehend questions")
+  create_postq_plot(eng2_rel, "eng2", "(7) Could comprehend Qs")
   
   data$eng.3[data$eng.3 == "nan"] <- NA
   eng3 <- table(data$condition, data$eng.3)
