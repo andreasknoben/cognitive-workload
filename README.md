@@ -1,8 +1,13 @@
 # Cognitive Workload with Conceptual Models
 This repository contains the code for the research project "Cognitive Workload Associated with Different Conceptual Modelling Approaches". It contains the code to (pre-)process the EEG data (MATLAB), to extract answers from the survey (Python), and code to perform statistical analyses and visualisations on the available data (R). Please refer to the appropriate sections for more information about these.
 
+1. [EEG Processing](#eeg-processing)
+2. [Statistics](#statistics)
+3. [Survey Analysis](#survey-analysis)
+
+
 ## EEG Processing
-The `eeg-processing` folder contains the code necessary to (pre-)process the EEG data. This section reviews the functions of each file.
+The `eeg_processing` folder contains the code necessary to (pre-)process the EEG data. This section reviews the functions of each file.
 
 ### calc_index.m
 The `calc.index.m` script takes the `.mat` files created by `calc_power.m`, in which the powers are stored. It calculates the EEG Engagement Indices for each participant and channel and puts them in the appropriate conditions. The indices are exported to CSV files in the `data/indices` folder.
@@ -37,6 +42,9 @@ The `statistical_tests.R` file aims to compare the EEG Engagement Indices betwee
 ### moderation_analysis.R
 The `moderation_analysis.R` file aims to find out whether there is a moderation effect of pre-experiment domain knowledge on the EEG Engagement Indices. It does this by creating multiple linear models and testing for the interaction effect of condition * moderator on the indices.
 
+### questionnaire_stats.R
+The `questionnaire_stats.R` file contains the code to analysis the pre- and post-experiment questionnaire. It creates the appropriate bar plots visualising the answers given, and it runs a statistical test to analyse whether there are any difference in understanding of the models, use of the models, mental load, and English level between the LOEM and HOEM groups.
+
 ### recode.R
 The `recode.R` recodes the answers given to the questionnaire. It converts a yes-no scale into 1 and 0 (resp.), and also assigns appropriate numbers to the Likert scales present in the survey.
 
@@ -45,6 +53,9 @@ The `scores_stats.R` file aims to compare the task scores between the LOEM and H
 
 ### stat_funcs.R
 The `stat_funcs.R` file contains a few functions that are used by multiple R files. The `load_eeg()` function loads the EEG files and creates a list of dataframes. The `relative_scores()` function creates relative scores out of the original task scores.
+
+### time_stats.R
+The `time_stats.R` file contains the code to visualise the time it took for the participants to complete the tasks, and to run a statistical test to compare the time taken between conditions.
 
 ## Survey analysis
 The `survey-analysis` folder contains the code that allows to check the questions automatically for as much as possible.
