@@ -45,10 +45,10 @@ create_preq_plot <- function(data, filename, title) {
     ylab("Frequency") + 
     ylim(c(0, 1)) +
     theme(plot.title = element_text(size = 18),
-          axis.text.y = element_text(size = 16),
-          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 18),
+          axis.text.x = element_text(size = 18),
           axis.title.y = element_blank(),
-          axis.title.x = element_text(size = 16),
+          axis.title.x = element_text(size = 18),
           legend.position = "none")
     
   ggsave(filename, plot = plot, device = "svg", width = 7.5, height = 5)
@@ -75,7 +75,7 @@ plot_btk <- function(data) {
   
   # Plot relative frequencies of the answers to BTK1
   create_preq_plot(btk1_rel, "survey_analysis/results/pre-experiment/btk1.svg",
-                   "Knowledge: organise bus tour company")
+                   "Knowledge: organise bus company")
   
   # Prepare data to plot BTK2 to BTK6
   long_btk <- long_preq(data, "bus")
@@ -97,9 +97,9 @@ plot_btk <- function(data) {
     ylab("Frequency") + 
     ylim(c(0, 1)) +
     theme(plot.title = element_text(size = 18),
-          axis.text = element_text(size = 16),
-          axis.title = element_text(size = 16),
-          legend.text = element_text(size = 16),
+          axis.text = element_text(size = 18),
+          axis.title = element_text(size = 18),
+          legend.text = element_text(size = 18),
           legend.title = element_text(size = 18)) +
     scale_fill_discrete(breaks = c("Yes", "No")) + 
     scale_x_discrete(labels = axislabels, limits = rev)
@@ -150,9 +150,9 @@ plot_rfk <- function(data) {
     ylab("Frequency") + 
     ylim(c(0, 1)) +
     theme(plot.title = element_text(size = 18),
-          axis.text = element_text(size = 16),
-          axis.title = element_text(size = 16),
-          legend.text = element_text(size = 16),
+          axis.text = element_text(size = 18),
+          axis.title = element_text(size = 18),
+          legend.text = element_text(size = 18),
           legend.title = element_text(size = 18)) +
     scale_fill_discrete(breaks = c("Yes", "No")) + 
     scale_x_discrete(labels = axislabels, limits = rev)

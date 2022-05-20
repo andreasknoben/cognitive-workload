@@ -17,14 +17,15 @@ plot_correlation <- function(df, chan) {
   
   plot <- ggplot(data = na.omit(df), aes(x = scores, y = index, color = factor(condition))) + 
     geom_point() + 
-    geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+    geom_smooth(method = "lm", se = FALSE, formula = y ~ x, size = 2) +
     labs(title = chan) +
     theme(axis.title.x = element_blank(),
           axis.title.y = element_blank(),
-          axis.text.x = element_text(size = 26),
-          axis.text.y = element_text(size = 26),
-          plot.title = element_text(size = 32, hjust = 0.5),
-          legend.position = "none")
+          axis.text.x = element_text(size = 30),
+          axis.text.y = element_text(size = 30),
+          plot.title = element_text(size = 36, hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(breaks = c(-1, 0, 1))
 
   ggsave(paste(output, chan, ".svg", sep = ""), plot = plot, width = 5, height = 5)
 }
